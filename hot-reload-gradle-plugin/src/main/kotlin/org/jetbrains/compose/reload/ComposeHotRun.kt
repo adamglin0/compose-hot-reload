@@ -19,6 +19,8 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import org.jetbrains.kotlin.gradle.targets.jvm.KotlinJvmTarget
 
 internal fun Project.setupComposeHotRunConventions() {
+    project.composeHotReloadProcessManagerTask()
+
     tasks.withType<AbstractComposeHotRun>().configureEach { task ->
         task.group = "run"
         task.configureJavaExecTaskForHotReload(task.compilation)

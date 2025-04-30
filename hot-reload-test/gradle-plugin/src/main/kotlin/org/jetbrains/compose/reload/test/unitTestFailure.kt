@@ -31,6 +31,7 @@ internal fun createTestFailure(message: OrchestrationMessage.CriticalException):
             override fun getActualContent(): ByteArray? = null
             override fun getExpected(): String? = null
             override fun getActual(): String? = null
+            override fun isAssumptionFailure(): Boolean = false
         }
     }
 }

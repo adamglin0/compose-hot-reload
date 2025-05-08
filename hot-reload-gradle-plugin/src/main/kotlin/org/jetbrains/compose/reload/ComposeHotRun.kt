@@ -10,6 +10,7 @@ import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.options.Option
 import org.gradle.kotlin.dsl.property
+import org.jetbrains.compose.reload.gradle.core.composeReloadGradleBuildContinuous
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 
 sealed class AbstractComposeHotRun : JavaExec() {
@@ -30,6 +31,24 @@ sealed class AbstractComposeHotRun : JavaExec() {
 
     @get:Internal
     internal val snapshotTaskName = project.objects.property<String>()
+
+    @get:Internal
+    @get:JvmName("getIsRecompileContinuous")
+    internal val isRecompileContinuous = project.objects.property<Boolean>().convention(
+        project.ideIsRecompileContinuousMode.orElse(project.composeReloadGradleBuildContinuous)
+    )
+
+    @Option(option = "autoReload", description = "Enables automatic recompilation/reload once the source files change")
+    @Suppress("unused")
+    internal fun autoRecompileOption(enabled: Boolean) {
+        isRecompileContinuous.set(enabled)
+    }
+
+    @Suppress("unused")
+    @Option(option = "auto", description = "Enables automatic recompilation/reload once the source files change")
+    internal fun autoRecompileOption() {
+        isRecompileContinuous.set(true)
+    }
 }
 
 /**

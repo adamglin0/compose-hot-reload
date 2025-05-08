@@ -196,6 +196,10 @@ public class TransactionScope internal constructor(
         oldValue: String, newValue: String
     ): Unit = withAsyncTrace("'replaceSourceCodeAndReload'") run@{
         replaceSourceCode(sourceFile, oldValue, newValue)
+        when (fixture.buildMode) {
+            BuildMode.Explicit -> fixture.gradleRunner.build("reload").assertSuccess()
+            else -> Unit
+        }
         awaitReload()
     }
 

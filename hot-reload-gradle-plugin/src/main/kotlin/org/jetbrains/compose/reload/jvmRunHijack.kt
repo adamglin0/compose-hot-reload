@@ -36,6 +36,11 @@ internal val KotlinTarget.hijackJvmRunTask: Future<TaskProvider<out KotlinJvmRun
     val mainCompilation = project.provider { compilations.getByName("main") }
 
     val runTask = project.tasks.register<KotlinJvmRun>(camelCase(name, "run")) {
+        mainClass.convention(
+            project.providers.gradleProperty("mainClass")
+                .orElse(project.providers.systemProperty("mainClass"))
+        )
+
         configureJavaExecTaskForHotReload(mainCompilation)
     }
 

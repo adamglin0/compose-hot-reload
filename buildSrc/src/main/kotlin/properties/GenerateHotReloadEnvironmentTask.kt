@@ -156,8 +156,7 @@ open class GenerateHotReloadEnvironmentTask : DefaultTask() {
                     "statement"("    ?: return null")
                 }
 
-
-                "statement"(property.convertTypeCode("value"))
+                "statement"("return ${property.convertTypeCode("value")}")
             }
         }
 

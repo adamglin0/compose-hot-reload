@@ -14,6 +14,7 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.BuildTask
 import org.jetbrains.compose.reload.orchestration.asChannel
 import org.jetbrains.compose.reload.test.gradle.ApplicationLaunchMode
 import org.jetbrains.compose.reload.test.gradle.BuildGradleKts
+import org.jetbrains.compose.reload.test.gradle.TestedBuildMode
 import org.jetbrains.compose.reload.test.gradle.GradleRunner.ExitCode.Companion.failure
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
@@ -29,7 +30,6 @@ import org.jetbrains.compose.reload.test.gradle.initialSourceCode
 import org.jetbrains.compose.reload.test.gradle.launchApplicationAndWait
 import org.jetbrains.compose.reload.test.gradle.replaceSourceCode
 import org.jetbrains.compose.reload.test.gradle.replaceText
-import org.jetbrains.compose.reload.utils.BuildMode
 import org.jetbrains.compose.reload.utils.GradleIntegrationTest
 import org.jetbrains.compose.reload.utils.QuickTest
 import kotlin.io.path.createParentDirectories
@@ -43,7 +43,6 @@ import kotlin.test.fail
 @QuickTest
 @TestedLaunchMode(ApplicationLaunchMode.Detached)
 @TestedProjectMode(ProjectMode.Kmp)
-@BuildMode(isContinuous = false)
 class BuildEventTest {
     @HotReloadTest
     fun `test - build started`(fixture: HotReloadTestFixture) = fixture.runTest {

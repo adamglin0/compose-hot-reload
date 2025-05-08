@@ -10,10 +10,12 @@ package org.jetbrains.compose.reload.utils
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.test.core.CompilerOption
 import org.jetbrains.compose.reload.test.gradle.ApplicationLaunchMode
+import org.jetbrains.compose.reload.test.gradle.BuildMode
 import org.jetbrains.compose.reload.test.gradle.Headless
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestDimensionExtension
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestInvocationContext
 import org.jetbrains.compose.reload.test.gradle.ProjectMode
+import org.jetbrains.compose.reload.test.gradle.TestedBuildMode
 import org.jetbrains.compose.reload.test.gradle.TestedComposeVersion
 import org.jetbrains.compose.reload.test.gradle.TestedGradleVersion
 import org.jetbrains.compose.reload.test.gradle.TestedKotlinVersion
@@ -50,11 +52,17 @@ class HotReloadTestDimensionBuilder : HotReloadTestDimensionExtension {
 
         val defaultLaunchMode = launchModes.singleOrNull() ?: ApplicationLaunchMode.default
 
+        val buildModes = context.findRepeatableAnnotations<TestedBuildMode>()
+            .map { it.mode }.toSet().ifEmpty { listOf(BuildMode.default) }
+
+        val defaultBuildMode = if (BuildMode.default in buildModes) BuildMode.default else buildModes.first()
+
         val baselineContext = HotReloadTestInvocationContext {
             kotlinVersion = TestedKotlinVersion(KotlinToolingVersion(defaultKotlinVersion.version))
             gradleVersion = TestedGradleVersion(defaultGradleVersion.version)
             composeVersion = TestedComposeVersion(defaultComposeVersion.version)
             launchMode = defaultLaunchMode
+            buildMode = defaultBuildMode
         }
 
         var result = setOf(baselineContext)
@@ -96,6 +104,13 @@ class HotReloadTestDimensionBuilder : HotReloadTestDimensionExtension {
                         this.launchMode = launchMode
                     }
                 }
+            }
+        }
+
+        /* Expand build modes */
+        result += buildModes.map { buildMode ->
+            baselineContext.copy {
+                this.buildMode = buildMode
             }
         }
 

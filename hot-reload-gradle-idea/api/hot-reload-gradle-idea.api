@@ -8,6 +8,11 @@ public final class org/jetbrains/compose/reload/gradle/idea/IdeaComposeHotReload
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
+public final class org/jetbrains/compose/reload/gradle/idea/IdeaComposeHotReloadSupportVersions {
+	public static final field INSTANCE Lorg/jetbrains/compose/reload/gradle/idea/IdeaComposeHotReloadSupportVersions;
+	public final fun getSupportReloadTasks ()I
+}
+
 public abstract interface class org/jetbrains/compose/reload/gradle/idea/IdeaComposeHotRunTask : java/io/Serializable {
 	public static final field Companion Lorg/jetbrains/compose/reload/gradle/idea/IdeaComposeHotRunTask$Companion;
 	public abstract fun getArgFile ()Ljava/nio/file/Path;

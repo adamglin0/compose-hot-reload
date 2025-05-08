@@ -14,14 +14,12 @@ import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
 import org.jetbrains.compose.reload.test.gradle.checkScreenshot
 import org.jetbrains.compose.reload.test.gradle.initialSourceCode
 import org.jetbrains.compose.reload.test.gradle.replaceSourceCode
-import org.jetbrains.compose.reload.utils.BuildMode
 import org.jetbrains.compose.reload.utils.GradleIntegrationTest
 import org.jetbrains.compose.reload.utils.QuickTest
 import kotlin.test.assertEquals
 
-@BuildMode(isContinuous = false)
 @QuickTest
-class NonContinuousRecompileTest {
+class RecompileRequestTest {
     private val logger = createLogger()
 
     @HotReloadTest

@@ -82,7 +82,8 @@ internal class HotReloadTestFixtureExtension(
             orchestration = orchestrationServer,
             projectMode = context.projectMode,
             launchMode = context.launchMode,
-            isDebug = debugAnnotation
+            buildMode = context.buildMode,
+            isDebug = debugAnnotation,
         )
     }
 }

@@ -48,3 +48,7 @@ public annotation class ExtendGradleProperties(val extension: KClass<out GradleP
 @Repeatable
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
 public annotation class ExtendHotReloadTestDimension(val extension: KClass<out HotReloadTestDimensionExtension>)
+
+@Repeatable
+@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
+public annotation class TestedBuildMode(val mode: BuildMode)

@@ -28,6 +28,7 @@ public data class HotReloadTestInvocationContext(
     val gradleVersion: TestedGradleVersion get() = extras[TestedGradleVersion.key] ?: TestedGradleVersion.default
     val projectMode: ProjectMode get() = extras[ProjectMode.key] ?: ProjectMode.Kmp
     val launchMode: ApplicationLaunchMode get() = extras[ApplicationLaunchMode.key] ?: ApplicationLaunchMode.default
+    val buildMode: BuildMode get() = extras[BuildMode.key] ?: BuildMode.default
     val compilerOptions: TestedCompilerOptions = extras[TestedCompilerOptions.key] ?: TestedCompilerOptions.default
 
     public fun getDisplayName(): String {
@@ -77,6 +78,7 @@ public class HotReloadTestInvocationContextBuilder(
     public var gradleVersion: TestedGradleVersion? by extrasReadWriteProperty(TestedGradleVersion.key)
     public var projectMode: ProjectMode? by extrasReadWriteProperty(ProjectMode.key)
     public var launchMode: ApplicationLaunchMode? by extrasReadWriteProperty(ApplicationLaunchMode.key)
+    public var buildMode: BuildMode? by extrasReadWriteProperty(BuildMode.key)
     public var compilerOptions: TestedCompilerOptions? by extrasReadWriteProperty(TestedCompilerOptions.key)
 
     public fun compilerOption(option: CompilerOption, enabled: Boolean) {
@@ -112,3 +114,6 @@ public val ExtensionContext.launchMode: ApplicationLaunchMode
 
 public val ExtensionContext.compilerOptions: TestedCompilerOptions
     get() = hotReloadTestInvocationContextOrThrow.compilerOptions
+
+public val ExtensionContext.buildMode: BuildMode
+    get() = hotReloadTestInvocationContextOrThrow.buildMode

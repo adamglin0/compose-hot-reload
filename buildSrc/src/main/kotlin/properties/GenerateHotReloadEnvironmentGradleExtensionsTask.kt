@@ -29,18 +29,28 @@ open class GenerateHotReloadEnvironmentGradleExtensionsTask : DefaultTask() {
             import java.nio.file.Path
             import kotlin.io.path.Path
             import org.gradle.api.Project
-            import org.jetbrains.compose.reload.core.Os
+            import org.gradle.api.provider.Provider
             import org.jetbrains.compose.reload.core.HotReloadProperty
+            import org.jetbrains.compose.reload.core.Os
             import org.jetbrains.compose.reload.gradle.InternalHotReloadGradleApi
             
             {{element}}
         """.trimIndent().asTemplateOrThrow().renderOrThrow {
             val elementTemplate = """
+                
+                  /**
+                * See [HotReloadProperty.{{name}}]
+                * {{documentation}}
+                */
+                {{visibility}} val Project.{{providerName}}: Provider<{{providerType}}> get() {
+                    {{providerStatement}} 
+                }
+                
                 /**
                 * See [HotReloadProperty.{{name}}]
                 * {{documentation}}
                 */
-                {{visibility}} val Project.{{propertyName}}: {{type}} get() {
+                {{visibility}} val Project.{{propertyName}}: {{propertyType}} get() {
                     {{statement}} 
                 }
                 
@@ -48,22 +58,28 @@ open class GenerateHotReloadEnvironmentGradleExtensionsTask : DefaultTask() {
 
 
             properties.filter { DeclaredHotReloadProperty.Target.Build in it.targets }.forEach { property ->
+                val propertyName = "composeReload${property.name.capitalized()}"
+                val providerName = "${propertyName}Provider"
+
                 "element"(elementTemplate.renderOrThrow {
                     "visibility"("@InternalHotReloadGradleApi")
                     "name"(property.name)
                     "propertyName"("composeReload${property.name.capitalized()}")
-                    "type"(property.toKotlinType())
+                    "providerName"(providerName)
+                    "propertyType"(property.toKotlinType())
+                    "providerType"(property.toKotlinType(nullable = false))
                     property.documentation?.trim()?.lines()?.forEach { line ->
                         "documentation"(line)
                     }
-                    "statement"("""val value = providers.gradleProperty("${property.key}")""")
-                    "statement"("""    .orElse(providers.systemProperty("${property.key}"))""")
-                    "statement"("""    .orElse(providers.environmentVariable("${property.key}"))""")
-                    if (property.default != null) "statement"("""    .orElse(${property.renderDefault()})""")
-                    if (property.default != null) "statement"("""    .get()""")
-                    else "statement"("""    .getOrNull() ?: return null""")
+                    "providerStatement"("""return providers.gradleProperty("${property.key}")""")
+                    "providerStatement"("""    .orElse(providers.systemProperty("${property.key}"))""")
+                    "providerStatement"("""    .orElse(providers.environmentVariable("${property.key}"))""")
+                    if (property.default != null) "providerStatement"("""    .orElse(${property.renderDefault()})""")
+                    "providerStatement"("""    .map { raw -> ${property.convertTypeCode("raw")} }""")
 
-                    "statement"(property.convertTypeCode("value"))
+                    "statement"("return $providerName")
+                    if (property.default != null) "statement"("""    .get()""")
+                    else "statement"("""    .getOrNull()""")
                 })
             }
         }

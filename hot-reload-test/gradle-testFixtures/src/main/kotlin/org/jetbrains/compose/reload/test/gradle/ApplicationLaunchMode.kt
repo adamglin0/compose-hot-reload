@@ -12,7 +12,7 @@ public enum class ApplicationLaunchMode : HotReloadTestDimension {
 
     override fun displayName(): String? {
         return if (this == default) null
-        else name
+        else "LaunchMode($name)"
     }
 
     public companion object {

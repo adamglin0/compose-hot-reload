@@ -50,8 +50,9 @@ internal constructor(
     public val orchestration: OrchestrationServer,
     public val projectMode: ProjectMode,
     public val launchMode: ApplicationLaunchMode,
+    public val buildMode: BuildMode,
     @PublishedApi
-    internal val isDebug: Boolean
+    internal val isDebug: Boolean,
 ) : AutoCloseable {
 
     public suspend fun <T> runTransaction(

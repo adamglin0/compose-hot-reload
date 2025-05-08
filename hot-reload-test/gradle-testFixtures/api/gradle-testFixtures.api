@@ -57,6 +57,20 @@ public final class org/jetbrains/compose/reload/test/gradle/BuildGradleKtsExtens
 	public static final fun renderBuildGradleKts (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
 }
 
+public final class org/jetbrains/compose/reload/test/gradle/BuildMode : java/lang/Enum, org/jetbrains/compose/reload/test/gradle/HotReloadTestDimension {
+	public static final field Companion Lorg/jetbrains/compose/reload/test/gradle/BuildMode$Companion;
+	public static final field Continuous Lorg/jetbrains/compose/reload/test/gradle/BuildMode;
+	public static final field Explicit Lorg/jetbrains/compose/reload/test/gradle/BuildMode;
+	public fun displayName ()Ljava/lang/String;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lorg/jetbrains/compose/reload/test/gradle/BuildMode;
+	public static fun values ()[Lorg/jetbrains/compose/reload/test/gradle/BuildMode;
+}
+
+public final class org/jetbrains/compose/reload/test/gradle/BuildMode$Companion {
+	public final fun getDefault ()Lorg/jetbrains/compose/reload/test/gradle/BuildMode;
+}
+
 public final class org/jetbrains/compose/reload/test/gradle/CheckScreenshotKt {
 	public static final fun checkScreenshot (Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
@@ -231,6 +245,7 @@ public final class org/jetbrains/compose/reload/test/gradle/HotReloadTestFixture
 	public field daemonTestScope Lkotlinx/coroutines/CoroutineScope;
 	public fun close ()V
 	public final fun createReceiveChannel (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun getBuildMode ()Lorg/jetbrains/compose/reload/test/gradle/BuildMode;
 	public final fun getDaemonTestScope ()Lkotlinx/coroutines/CoroutineScope;
 	public final fun getGradleRunner ()Lorg/jetbrains/compose/reload/test/gradle/GradleRunner;
 	public final fun getLaunchMode ()Lorg/jetbrains/compose/reload/test/gradle/ApplicationLaunchMode;
@@ -271,6 +286,7 @@ public final class org/jetbrains/compose/reload/test/gradle/HotReloadTestInvocat
 	public fun equals (Ljava/lang/Object;)Z
 	public fun getAdditionalExtensions ()Ljava/util/List;
 	public final fun getAndroidVersion ()Lorg/jetbrains/compose/reload/test/gradle/TestedAndroidVersion;
+	public final fun getBuildMode ()Lorg/jetbrains/compose/reload/test/gradle/BuildMode;
 	public final fun getCompilerOptions ()Lorg/jetbrains/compose/reload/test/gradle/TestedCompilerOptions;
 	public final fun getComposeVersion ()Lorg/jetbrains/compose/reload/test/gradle/TestedComposeVersion;
 	public final fun getDisplayName ()Ljava/lang/String;
@@ -290,6 +306,7 @@ public final class org/jetbrains/compose/reload/test/gradle/HotReloadTestInvocat
 	public synthetic fun <init> (Lorg/jetbrains/kotlin/tooling/core/MutableExtras;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun compilerOption (Lorg/jetbrains/compose/reload/test/core/CompilerOption;Z)V
 	public final fun getAndroidVersion ()Lorg/jetbrains/compose/reload/test/gradle/TestedAndroidVersion;
+	public final fun getBuildMode ()Lorg/jetbrains/compose/reload/test/gradle/BuildMode;
 	public final fun getCompilerOptions ()Lorg/jetbrains/compose/reload/test/gradle/TestedCompilerOptions;
 	public final fun getComposeVersion ()Lorg/jetbrains/compose/reload/test/gradle/TestedComposeVersion;
 	public synthetic fun getExtras ()Lorg/jetbrains/kotlin/tooling/core/Extras;
@@ -299,6 +316,7 @@ public final class org/jetbrains/compose/reload/test/gradle/HotReloadTestInvocat
 	public final fun getLaunchMode ()Lorg/jetbrains/compose/reload/test/gradle/ApplicationLaunchMode;
 	public final fun getProjectMode ()Lorg/jetbrains/compose/reload/test/gradle/ProjectMode;
 	public final fun setAndroidVersion (Lorg/jetbrains/compose/reload/test/gradle/TestedAndroidVersion;)V
+	public final fun setBuildMode (Lorg/jetbrains/compose/reload/test/gradle/BuildMode;)V
 	public final fun setCompilerOptions (Lorg/jetbrains/compose/reload/test/gradle/TestedCompilerOptions;)V
 	public final fun setComposeVersion (Lorg/jetbrains/compose/reload/test/gradle/TestedComposeVersion;)V
 	public final fun setGradleVersion (Lorg/jetbrains/compose/reload/test/gradle/TestedGradleVersion;)V
@@ -311,6 +329,7 @@ public final class org/jetbrains/compose/reload/test/gradle/HotReloadTestInvocat
 	public static final fun HotReloadTestInvocationContext (Lkotlin/jvm/functions/Function1;)Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestInvocationContext;
 	public static synthetic fun HotReloadTestInvocationContext$default (Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestInvocationContext;
 	public static final fun copy (Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestInvocationContext;Lkotlin/jvm/functions/Function1;)Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestInvocationContext;
+	public static final fun getBuildMode (Lorg/junit/jupiter/api/extension/ExtensionContext;)Lorg/jetbrains/compose/reload/test/gradle/BuildMode;
 	public static final fun getCompilerOptions (Lorg/junit/jupiter/api/extension/ExtensionContext;)Lorg/jetbrains/compose/reload/test/gradle/TestedCompilerOptions;
 	public static final fun getHotReloadTestInvocationContext (Lorg/junit/jupiter/api/extension/ExtensionContext;)Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestInvocationContext;
 	public static final fun getHotReloadTestInvocationContextOrThrow (Lorg/junit/jupiter/api/extension/ExtensionContext;)Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestInvocationContext;
@@ -450,6 +469,14 @@ public final class org/jetbrains/compose/reload/test/gradle/TestedAndroidVersion
 
 public final class org/jetbrains/compose/reload/test/gradle/TestedAndroidVersion$Companion {
 	public final fun getDefault ()Lorg/jetbrains/compose/reload/test/gradle/TestedAndroidVersion;
+}
+
+public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/TestedBuildMode : java/lang/annotation/Annotation {
+	public abstract fun mode ()Lorg/jetbrains/compose/reload/test/gradle/BuildMode;
+}
+
+public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/TestedBuildMode$Container : java/lang/annotation/Annotation {
+	public abstract fun value ()[Lorg/jetbrains/compose/reload/test/gradle/TestedBuildMode;
 }
 
 public final class org/jetbrains/compose/reload/test/gradle/TestedCompilerOptions : java/util/Map, kotlin/jvm/internal/markers/KMappedMarker, org/jetbrains/compose/reload/test/gradle/HotReloadTestDimension {

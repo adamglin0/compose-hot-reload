@@ -73,7 +73,7 @@ internal class DeclaredHotReloadProperty(
     }
 }
 
-internal fun DeclaredHotReloadProperty.toKotlinType(): String {
+internal fun DeclaredHotReloadProperty.toKotlinType(nullable: Boolean = default == null): String {
     return when (type) {
         Type.String -> "String"
         Type.Boolean -> "Boolean"
@@ -81,7 +81,7 @@ internal fun DeclaredHotReloadProperty.toKotlinType(): String {
         Type.File -> "Path"
         Type.Files -> "List<Path>"
         Type.Enum -> (enumClass ?: error("Unknown enum ${type}"))
-    }.plus("?".takeIf { default == null } ?: "")
+    }.plus("?".takeIf { nullable } ?: "")
 }
 
 internal fun DeclaredHotReloadProperty.Target.toSourceCode(): String {
@@ -93,12 +93,12 @@ internal fun DeclaredHotReloadProperty.Target.toSourceCode(): String {
 }
 
 internal fun DeclaredHotReloadProperty.convertTypeCode(variableName: String) = when (type) {
-    Type.String -> "return $variableName"
-    Type.Boolean -> "return $variableName.toBooleanStrict()"
-    Type.Int -> "return $variableName.toInt()"
-    Type.File -> "return Path($variableName)"
-    Type.Files -> "return $variableName.split(File.pathSeparator).map(::Path)"
-    Type.Enum -> """return enumValueOf<${enumClass ?: error("Unknown enum ${type}")}>($variableName)"""
+    Type.String -> variableName
+    Type.Boolean -> "$variableName.toBooleanStrict()"
+    Type.Int -> "$variableName.toInt()"
+    Type.File -> "Path($variableName)"
+    Type.Files -> "$variableName.split(File.pathSeparator).map(::Path)"
+    Type.Enum -> """enumValueOf<${enumClass ?: error("Unknown enum ${type}")}>($variableName)"""
 }
 
 internal fun DeclaredHotReloadProperty.renderDefault(): String? {

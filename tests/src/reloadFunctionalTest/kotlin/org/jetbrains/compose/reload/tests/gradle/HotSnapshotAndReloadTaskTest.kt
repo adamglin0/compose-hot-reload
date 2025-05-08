@@ -30,7 +30,6 @@ import org.jetbrains.compose.reload.test.gradle.checkScreenshot
 import org.jetbrains.compose.reload.test.gradle.getDefaultMainKtSourceFile
 import org.jetbrains.compose.reload.test.gradle.initialSourceCode
 import org.jetbrains.compose.reload.test.gradle.replaceSourceCode
-import org.jetbrains.compose.reload.utils.BuildMode
 import org.jetbrains.compose.reload.utils.GradleIntegrationTest
 import org.jetbrains.compose.reload.utils.QuickTest
 import java.util.concurrent.TimeUnit
@@ -48,7 +47,6 @@ import kotlin.test.fail
 @TestedLaunchMode(ApplicationLaunchMode.Detached)
 @TestedProjectMode(ProjectMode.Kmp)
 @GradleIntegrationTest
-@BuildMode(isContinuous = false)
 class HotSnapshotAndReloadTaskTest {
 
     private val HotReloadTestFixture.snapshotFile get() = projectDir.resolve("build/run/jvmMain/classpath/.snapshot")

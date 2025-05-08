@@ -105,16 +105,16 @@ internal fun JavaExec.configureJavaExecTaskForHotReload(compilation: Provider<Ko
     val pidfile = if (this is AbstractComposeHotRun) this.pidFile
     else compilation.flatMap { compilation -> compilation.pidFile }
 
+    val isRecompileContinuous = if (this is AbstractComposeHotRun) this.isRecompileContinuous
+    else project.provider { true }
+
     withComposeHotReloadArguments {
+        setMainClass(mainClass)
         setPidFile(pidfile.map { it.asFile })
         setArgFile(argfile.map { it.asFile })
+        isRecompileContinuous(isRecompileContinuous)
         setReloadTaskName(compilation.map { compilation -> compilation.hotReloadTaskName })
     }
-
-    mainClass.value(
-        project.providers.gradleProperty("mainClass")
-            .orElse(project.providers.systemProperty("mainClass"))
-    )
 
     val intellijDebuggerDispatchPort = project.providers
         .environmentVariable(HotReloadProperty.IntelliJDebuggerDispatchPort.key)

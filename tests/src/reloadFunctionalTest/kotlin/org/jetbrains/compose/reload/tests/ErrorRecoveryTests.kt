@@ -37,6 +37,7 @@ class ErrorRecoveryTests {
         fixture.checkScreenshot("0-initial")
         fixture.runTransaction {
             code.replaceText("""TestText("Hello")""", """error("Foo")""")
+            requestReload()
             assertEquals("Foo", skipToMessage<OrchestrationMessage.UIException>().message)
         }
 
@@ -86,23 +87,27 @@ class ErrorRecoveryTests {
         fixture.sendTestEvent()
         fixture.checkScreenshot("1-after-sendTestEvent")
 
-        /*
-        Illegal Change: Replacing superclass:
-        We expect this to be rejected!
-         */
-        code.replaceText("""Foo: A()""", """Foo: B()""")
+
         fixture.runTransaction {
+            /*
+            Illegal Change: Replacing superclass:
+            We expect this to be rejected!
+            */
+            code.replaceText("""Foo: A()""", """Foo: B()""")
+            requestReload()
             val request = skipToMessage<OrchestrationMessage.ReloadClassesRequest>()
             val result = skipToMessage<OrchestrationMessage.ReloadClassesResult>()
             assertEquals(request.messageId, result.reloadRequestId)
             assertFalse(result.isSuccess)
         }
 
-        /*
-        Recover from the illegal change: Revert to the original class
-         */
-        code.replaceText("""Foo: B()""", """Foo: A()""")
+
         fixture.runTransaction {
+            /*
+             Recover from the illegal change: Revert to the original class
+            */
+            code.replaceText("""Foo: B()""", """Foo: A()""")
+            requestReload()
             val request = skipToMessage<OrchestrationMessage.ReloadClassesRequest>()
             val result = skipToMessage<OrchestrationMessage.ReloadClassesResult>()
             assertEquals(request.messageId, result.reloadRequestId)

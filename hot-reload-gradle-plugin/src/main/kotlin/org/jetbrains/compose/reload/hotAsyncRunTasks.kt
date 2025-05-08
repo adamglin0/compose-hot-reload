@@ -52,6 +52,7 @@ private fun Project.registerComposeHotAsyncRunTask(
 ) {
     tasks.register(runTask.name + "Async", ComposeHotAsyncRun::class.java) { task ->
         task.argFile.set(argFileTaskProvider.flatMap { it.argFile })
+        task.runTask = runTask
 
         task.pidFile.set(project.provider {
             runTask.get().pidFile.get()
@@ -98,6 +99,10 @@ internal open class ComposeHotAsyncRun : DefaultTask() {
     internal val argFile = project.objects.fileProperty()
 
     @get:Internal
+    @Transient
+    internal var runTask: TaskProvider<out AbstractComposeHotRun>? = null
+
+    @get:Internal
     internal val pidFile = project.objects.fileProperty()
 
     @get:InputFile
@@ -142,6 +147,18 @@ internal open class ComposeHotAsyncRun : DefaultTask() {
     @Option(option = "funName", description = "Provide the name of the function to execute")
     fun funName(funName: String) {
         this.funName.set(funName)
+    }
+
+    @Option(option = "autoReload", description = "Enables automatic recompilation/reload once the source files change")
+    @Suppress("unused")
+    internal fun autoRecompileOption(enabled: Boolean) {
+        runTask?.configure { it.isRecompileContinuous.set(enabled) }
+    }
+
+    @Suppress("unused")
+    @Option(option = "auto", description = "Enables automatic recompilation/reload once the source files change")
+    internal fun autoRecompileOption() {
+        runTask?.configure { it.isRecompileContinuous.set(enabled) }
     }
 
     @TaskAction

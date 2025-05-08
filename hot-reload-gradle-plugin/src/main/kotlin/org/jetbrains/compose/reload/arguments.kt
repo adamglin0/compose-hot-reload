@@ -75,11 +75,10 @@ fun Project.composeHotReloadArguments(builder: ComposeHotReloadArgumentsBuilder.
 private class ComposeHotReloadArgumentsBuilderImpl(
     override val project: Project,
 ) : ComposeHotReloadArgumentsBuilder {
-    private val mainClass: Property<String> = project.objects.property(String::class.java)
-        .value(
-            project.providers.gradleProperty("mainClass")
-                .orElse(project.providers.systemProperty("mainClass"))
-        )
+    private val mainClass: Property<String> = project.objects.property(String::class.java).convention(
+        project.providers.gradleProperty("mainClass")
+            .orElse(project.providers.systemProperty("mainClass"))
+    )
 
     private var agentJar: FileCollection = project.composeHotReloadAgentJar()
     private var hotClasspath: FileCollection? = null

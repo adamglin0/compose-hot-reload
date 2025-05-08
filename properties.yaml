@@ -116,7 +116,7 @@ GradleBuildTask:
 GradleBuildContinuous:
   key: compose.reload.build.continuous
   type: boolean
-  default: "true"
+  default: "false"
   target: [ application, build ]
   documentation: |
     - true: Compose Hot Reload will start a recompiler Gradle Daemon, which will continuously rebuilt/reload the project
@@ -204,6 +204,17 @@ IdeaComposeHotReload:
     Set by IntelliJ to signal the Gradle Plugin that IDE tooling is available.
     Setting this variable will relax the Gradle Plugin to not touch existing run tasks as we expect
     the IDE to provide a convenient way of launching in hot-reload mode.
+
+IdeaComposeHotReloadSupportVersion:
+  key: idea.compose.hot-reload.version
+  type: int
+  target: [ build ]
+
+  documentation: |
+    Set by IntelliJ during builds to convey its 'support level' for hot reload.
+    Not Present, but 'idea.compose.hot-reload' being set: Supports running hot run tasks
+
+    2: Support running 'hot run' tasks and 'hot reload' tasks
 
 StdinFile:
   key: compose.reload.stdinFile

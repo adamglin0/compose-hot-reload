@@ -7,11 +7,15 @@
 
 package org.jetbrains.compose.reload.tests
 
+import kotlinx.coroutines.flow.toList
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.test.gradle.AndroidHotReloadTest
+import org.jetbrains.compose.reload.test.gradle.Debug
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
+import org.jetbrains.compose.reload.test.gradle.assertSuccessful
+import org.jetbrains.compose.reload.test.gradle.buildFlow
 import org.jetbrains.compose.reload.test.gradle.checkScreenshot
 import org.jetbrains.compose.reload.test.gradle.initialSourceCode
 import org.jetbrains.compose.reload.test.gradle.replaceSourceCode
@@ -50,6 +54,7 @@ class ScreenshotTests {
     @GradleIntegrationTest
     @HostIntegrationTest
     @HotReloadTest
+    @Debug(".*Continuous.*")
     fun `test - retained state`(fixture: HotReloadTestFixture) = fixture.runTest {
         val d = "\$"
         fixture initialSourceCode """
@@ -611,6 +616,7 @@ class ScreenshotTests {
         fixture.runTransaction {
             replaceSourceCode("// add C entry", "C,")
             replaceSourceCode("// add C case", "Tab.C -> TestText(\"C\")")
+            fixture.gradleRunner.buildFlow("reload").toList().assertSuccessful()
             awaitReload()
         }
         fixture.checkScreenshot("1-after-c-added")

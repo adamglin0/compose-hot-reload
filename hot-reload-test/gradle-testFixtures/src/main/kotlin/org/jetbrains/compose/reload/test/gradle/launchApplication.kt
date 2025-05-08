@@ -6,6 +6,7 @@
 package org.jetbrains.compose.reload.test.gradle
 
 import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 
 public fun HotReloadTestFixture.launchApplication(
@@ -36,8 +37,8 @@ public fun HotReloadTestFixture.launchApplication(
             append(runTask)
         }
 
-        val result = gradleRunner.build(*additionalArguments, runTaskPath)
-        if (result != GradleRunner.ExitCode.success) error("Application Failed: $result")
+        val result = gradleRunner.buildFlow(*additionalArguments, runTaskPath).toList()
+        result.assertSuccessful()
 
         if (launchMode == ApplicationLaunchMode.Detached) {
             awaitCancellation()

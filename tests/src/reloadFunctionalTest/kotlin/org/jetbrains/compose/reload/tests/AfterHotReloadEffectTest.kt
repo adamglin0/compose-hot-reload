@@ -5,13 +5,15 @@
 
 package org.jetbrains.compose.reload.tests
 
+import kotlinx.coroutines.flow.toList
 import org.jetbrains.compose.reload.core.HOT_RELOAD_VERSION
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.test.gradle.BuildGradleKtsExtension
 import org.jetbrains.compose.reload.test.gradle.ExtendBuildGradleKts
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
-
+import org.jetbrains.compose.reload.test.gradle.assertSuccessful
+import org.jetbrains.compose.reload.test.gradle.buildFlow
 import org.jetbrains.compose.reload.test.gradle.checkScreenshot
 import org.jetbrains.compose.reload.test.gradle.initialSourceCode
 import org.jetbrains.compose.reload.test.gradle.replaceSourceCodeAndReload
@@ -68,6 +70,7 @@ class AfterHotReloadEffectTest {
 
         fixture.runTransaction {
             replaceSourceCode("decoy = 0", "decoy = 1")
+            fixture.gradleRunner.buildFlow("reload").toList().assertSuccessful()
             assertEquals(1, skipToMessage<OrchestrationMessage.TestEvent>().payload)
             skipToMessage<OrchestrationMessage.UIRendered>()
             fixture.checkScreenshot("1-after-reload")
@@ -75,6 +78,7 @@ class AfterHotReloadEffectTest {
 
         fixture.runTransaction {
             replaceSourceCode("decoy = 1", "decoy = 2")
+            fixture.gradleRunner.buildFlow("reload").toList().assertSuccessful()
             assertEquals(2, skipToMessage<OrchestrationMessage.TestEvent>().payload)
             skipToMessage<OrchestrationMessage.UIRendered>()
             fixture.checkScreenshot("2-after-reload")
@@ -87,6 +91,7 @@ class AfterHotReloadEffectTest {
         fixture.sendTestEvent("start")
         fixture.runTransaction {
             replaceSourceCode("invoc.a", "invoc.b")
+            fixture.gradleRunner.buildFlow("reload").toList().assertSuccessful()
             assertEquals(3, skipToMessage<OrchestrationMessage.TestEvent>().payload)
             skipToMessage<OrchestrationMessage.UIRendered>()
             fixture.checkScreenshot("4-after-restarted")
@@ -110,6 +115,7 @@ class AfterHotReloadEffectTest {
 
         fixture.runTransaction {
             replaceSourceCode("\"A\"", "\"B\"")
+            fixture.gradleRunner.buildFlow("reload").toList().assertSuccessful()
             assertEquals("Servus", skipToMessage<OrchestrationMessage.TestEvent>().payload)
             fixture.checkScreenshot("1-B")
         }
@@ -122,6 +128,7 @@ class AfterHotReloadEffectTest {
 
             replaceSourceCode("AfterHotReloadEffect { sendTestEvent(\"Servus\") }", "")
             replaceSourceCode("\"B\"", "\"C\"")
+            fixture.gradleRunner.buildFlow("reload").toList().assertSuccessful()
             skipToMessage<OrchestrationMessage.UIRendered>()
             fixture.checkScreenshot("2-C")
             testEventScanner.cancel()

@@ -6,14 +6,27 @@
 package org.jetbrains.compose.reload.test.gradle
 
 import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.reload.core.Os
+import org.jetbrains.compose.reload.core.createLogger
+import java.util.concurrent.TimeUnit
+import kotlin.concurrent.thread
+import kotlin.io.path.absolutePathString
+import kotlin.io.path.bufferedReader
+import kotlin.io.path.exists
+
+private val logger = createLogger()
 
 public fun HotReloadTestFixture.launchApplication(
     projectPath: String = ":",
     mainClass: String = "MainKt"
 ) {
     daemonTestScope.launch {
+        val job = currentCoroutineContext().job
+
         val runTask = when (projectMode) {
             ProjectMode.Kmp -> when (launchMode) {
                 ApplicationLaunchMode.GradleBlocking -> "jvmRun"
@@ -26,7 +39,40 @@ public fun HotReloadTestFixture.launchApplication(
             }
         }
 
-        val additionalArguments = arrayOf("-DmainClass=$mainClass")
+        val additionalArguments = buildList {
+            add("-DmainClass=$mainClass")
+
+            /* Detached launches will create one more process: We create a pipe file to foward the output */
+            if (launchMode == ApplicationLaunchMode.Detached && Os.current() in listOf(Os.Linux, Os.MacOs)) {
+                val socketFile = generateSequence(0) { it + 1 }
+                    .map { projectDir.resolve("$it.sock") }
+                    .first { !it.exists() }
+
+                ProcessBuilder("mkfifo", socketFile.toString())
+                    .inheritIO().start().waitFor(5, TimeUnit.SECONDS)
+
+                add("--stdout")
+                add(socketFile.absolutePathString())
+
+                add("--stderr")
+                add(socketFile.absolutePathString())
+
+                val readerThread = thread(isDaemon = true, name = "App Output Reader") {
+                    try {
+                        socketFile.bufferedReader().forEachLine { line ->
+                            logger.info(line)
+                        }
+                    } finally {
+                        logger.info("App Output Reader finished")
+                    }
+                }
+
+                job.invokeOnCompletion {
+                    readerThread.interrupt()
+                }
+            }
+        }
+
 
         val runTaskPath = buildString {
             if (projectPath != ":") {
@@ -37,7 +83,7 @@ public fun HotReloadTestFixture.launchApplication(
             append(runTask)
         }
 
-        val result = gradleRunner.buildFlow(*additionalArguments, runTaskPath).toList()
+        val result = gradleRunner.buildFlow(runTaskPath, *additionalArguments.toTypedArray()).toList()
         result.assertSuccessful()
 
         if (launchMode == ApplicationLaunchMode.Detached) {

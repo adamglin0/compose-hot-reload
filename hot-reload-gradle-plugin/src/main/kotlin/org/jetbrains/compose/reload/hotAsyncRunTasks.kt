@@ -149,6 +149,18 @@ internal open class ComposeHotAsyncRun : DefaultTask() {
         this.funName.set(funName)
     }
 
+    @Suppress("unused")
+    @Option(option = "stdout", description = "Path to a file, directing stdout to")
+    fun stdout(file: String) {
+        stdoutFile.set(project.file(file))
+    }
+
+    @Option(option = "stderr", description = "Path to a file, directing stderr to")
+    @Suppress("unused")
+    fun stderr(file: String) {
+        stderrFile.set(project.file(file))
+    }
+
     @Option(option = "autoReload", description = "Enables automatic recompilation/reload once the source files change")
     @Suppress("unused")
     internal fun autoRecompileOption(enabled: Boolean) {

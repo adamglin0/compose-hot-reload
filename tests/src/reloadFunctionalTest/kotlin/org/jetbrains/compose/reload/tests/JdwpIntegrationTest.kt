@@ -11,12 +11,14 @@ import com.sun.jdi.connect.Connector
 import com.sun.jdi.connect.ListeningConnector
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.test.gradle.BuildGradleKtsExtension
+import org.jetbrains.compose.reload.test.gradle.BuildMode
 import org.jetbrains.compose.reload.test.gradle.ExtendBuildGradleKts
 import org.jetbrains.compose.reload.test.gradle.ExtendHotReloadTestDimension
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestDimensionExtension
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestInvocationContext
+import org.jetbrains.compose.reload.test.gradle.TestedBuildMode
 import org.jetbrains.compose.reload.test.gradle.checkScreenshot
 import org.jetbrains.compose.reload.test.gradle.initialSourceCode
 import org.junit.jupiter.api.AfterEach
@@ -45,6 +47,10 @@ import kotlin.test.DefaultAsserter.fail
  * 5) Manually issue a reload command using 'JDWP'
  * 6) Check an 'After' screenshot, asserting that the UI has been refreshed successfully.
  */
+@ExtendBuildGradleKts(JdwpExtension::class)
+@ExtendHotReloadTestDimension(JdwpExtension::class)
+@TestedBuildMode(BuildMode.Continuous)
+@TestedBuildMode(BuildMode.Explicit)
 class JdwpIntegrationTest {
 
     val connector: ListeningConnector = run {
@@ -67,8 +73,6 @@ class JdwpIntegrationTest {
     }
 
     @HotReloadTest
-    @ExtendBuildGradleKts(JdwpExtension::class)
-    @ExtendHotReloadTestDimension(JdwpExtension::class)
     fun `test - reload with jdwp`(fixture: HotReloadTestFixture) = fixture.runTest {
         val virtualMachineReference = AtomicReference<VirtualMachine>(null)
 
@@ -102,7 +106,6 @@ class JdwpIntegrationTest {
             val classNode = ClassNode().apply { ClassReader(codeBefore).accept(this, 0) }
             classNode.methods.forEach forEachMethod@{ methodNode ->
                 methodNode.instructions.forEach forEachInstruction@{ insnNode ->
-                    createLogger().info("Found instruction: $insnNode")
                     if (insnNode is LdcInsnNode && insnNode.cst == "Before") {
                         methodNode.instructions.insertBefore(insnNode, LdcInsnNode("After"))
                         methodNode.instructions.remove(insnNode)
@@ -115,7 +118,10 @@ class JdwpIntegrationTest {
         }
 
         /* Issue the reload request through the debugger and check the UI */
+        createLogger().info("Using 'redefineClasses' through the debugger...")
         virtualMachine.redefineClasses(reloads)
+
+        createLogger().info("Checking screenshot after the debugger command")
         checkScreenshot("1-after")
     }
 }

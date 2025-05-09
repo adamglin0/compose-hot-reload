@@ -52,6 +52,7 @@ public suspend fun HotReloadTestFixture.replaceSourceCodeAndReload(
     replaceSourceCodeAndReload(sourceFile = sourceFile, oldValue = oldValue, newValue = newValue)
 }
 
+public suspend fun HotReloadTestFixture.requestReload(): Unit = runTransaction { requestReload() }
 
 public fun HotReloadTestFixture.getDefaultMainKtSourceFile(): String {
     return when (projectMode) {

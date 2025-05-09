@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
@@ -170,6 +171,10 @@ public class TransactionScope internal constructor(
         skipToMessage<Ack>("Waiting for ack of '${message.javaClass.simpleName}'") { ack ->
             ack.acknowledgedMessageId == message.messageId
         }
+    }
+
+^    public suspend fun requestReload(): Iterable<GradleBuildEvent> = withAsyncTrace("'reload'") {
+        fixture.gradleRunner.buildFlow("reload").toList().assertSuccessful()
     }
 
     public suspend fun awaitReload(): Unit = withAsyncTrace("'awaitReload'") {

@@ -274,6 +274,7 @@ public final class org/jetbrains/compose/reload/test/gradle/HotReloadTestFixture
 	public static final fun replaceSourceCodeAndReload (Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static final fun replaceSourceCodeAndReload (Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun replaceSourceCodeAndReload$default (Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun requestReload (Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static final fun sendTestEvent (Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;Ljava/io/Serializable;Lkotlin/jvm/functions/Function3;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun sendTestEvent$default (Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;Ljava/io/Serializable;Lkotlin/jvm/functions/Function3;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 }
@@ -618,6 +619,7 @@ public final class org/jetbrains/compose/reload/test/gradle/TransactionScope : k
 	public final fun replaceSourceCode (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 	public final fun replaceSourceCodeAndReload (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun replaceSourceCodeAndReload$default (Lorg/jetbrains/compose/reload/test/gradle/TransactionScope;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun requestReload (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun send (Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage;)V
 	public final fun sync (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun writeCode (Ljava/lang/String;Ljava/lang/String;)Ljava/nio/file/Path;

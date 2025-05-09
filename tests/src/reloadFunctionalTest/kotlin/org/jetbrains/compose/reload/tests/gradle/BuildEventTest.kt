@@ -14,7 +14,6 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.BuildTask
 import org.jetbrains.compose.reload.orchestration.asChannel
 import org.jetbrains.compose.reload.test.gradle.ApplicationLaunchMode
 import org.jetbrains.compose.reload.test.gradle.BuildGradleKts
-import org.jetbrains.compose.reload.test.gradle.TestedBuildMode
 import org.jetbrains.compose.reload.test.gradle.GradleRunner.ExitCode.Companion.failure
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture

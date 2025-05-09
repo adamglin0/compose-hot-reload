@@ -12,6 +12,7 @@ import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.reload.core.Os
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
 import kotlin.io.path.absolutePathString
@@ -60,7 +61,7 @@ public fun HotReloadTestFixture.launchApplication(
                 val readerThread = thread(isDaemon = true, name = "App Output Reader") {
                     try {
                         socketFile.bufferedReader().forEachLine { line ->
-                            logger.info(line)
+                            orchestration.sendMessage(LogMessage("App", line))
                         }
                     } finally {
                         logger.info("App Output Reader finished")

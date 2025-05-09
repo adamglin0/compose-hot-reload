@@ -5,6 +5,7 @@
 
 package org.jetbrains.compose.reload.test.gradle
 
+import kotlinx.coroutines.channels.Channel
 import org.jetbrains.compose.reload.core.HotReloadProperty
 import org.jetbrains.compose.reload.orchestration.startOrchestrationServer
 import org.junit.jupiter.api.extension.AfterEachCallback
@@ -71,7 +72,9 @@ internal class HotReloadTestFixtureExtension(
             arguments = listOf(
                 "-P${HotReloadProperty.OrchestrationPort.key}=${orchestrationServer.port}",
                 "-P${HotReloadProperty.IsHeadless.key}=$isHeadless",
-            )
+            ),
+            stdoutChannel = Channel(),
+            stderrChannel = Channel(),
         )
 
         return HotReloadTestFixture(
@@ -90,7 +93,7 @@ internal class HotReloadTestFixtureExtension(
 
 internal fun ExtensionContext.getHotReloadTestFixtureOrThrow(): HotReloadTestFixture {
     return getStore(namespace).get(
-        HotReloadTestFixtureExtension.Companion.testFixtureKey,
+        HotReloadTestFixtureExtension.testFixtureKey,
         HotReloadTestFixture::class.java
     ) ?: error("Missing '${HotReloadTestFixture::class.simpleName}'")
 }

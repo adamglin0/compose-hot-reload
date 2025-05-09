@@ -41,12 +41,25 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ShutdownRequest
 import org.jetbrains.compose.reload.orchestration.asChannel
 import java.io.ByteArrayOutputStream
+import java.util.concurrent.TimeoutException
 import javax.imageio.ImageIO
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
+import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.ExperimentalTime
 
 private val logger = createLogger()
 
+internal data class SilenceTimeout(val timeout: Duration) : CoroutineContext.Element {
+    override val key: CoroutineContext.Key<*> = Key
+
+    companion object Key : CoroutineContext.Key<SilenceTimeout>
+}
+
+@OptIn(ExperimentalTime::class)
 @InternalHotReloadApi
 suspend fun runHeadlessApplication(
     timeout: Duration, width: Int, height: Int,
@@ -75,6 +88,7 @@ suspend fun runHeadlessApplication(
         var time = 0L
         val delay = 256.milliseconds
         var silence = 0.milliseconds
+        var previousSilenceWarning = Clock.System.now()
 
         while (isActive) {
             time += delay.inWholeNanoseconds
@@ -91,9 +105,16 @@ suspend fun runHeadlessApplication(
 
             if (message == null) {
                 silence += delay
-                if (silence.inWholeSeconds >= 5 && silence.inWholeSeconds % 5 == 0L) {
-                    logger.warn("No message received for $silence")
+                coroutineContext[SilenceTimeout]?.let { timeout ->
+                    if (silence >= timeout.timeout) throw TimeoutException(
+                        "No message received for $silence within timeout $timeout )"
+                    )
                 }
+                if (Clock.System.now() - previousSilenceWarning > 5.seconds) {
+                    logger.warn("No message received for $silence")
+                    previousSilenceWarning = Clock.System.now()
+                }
+
                 continue
             }
 
@@ -132,11 +153,13 @@ suspend fun runHeadlessApplication(
 @InternalHotReloadApi
 fun runHeadlessApplicationBlocking(
     timeout: Duration,
+    silenceTimeout: Duration? = null,
     width: Int, height: Int,
     content: @Composable () -> Unit
 ) {
     runBlocking(
         Dispatchers.Main + Job() + CoroutineName("HeadlessApplication") +
+            (if (silenceTimeout != null) SilenceTimeout(silenceTimeout) else EmptyCoroutineContext) +
             CoroutineExceptionHandler { context, throwable ->
                 OrchestrationMessage.CriticalException(
                     clientRole = OrchestrationClientRole.Application,
@@ -145,6 +168,7 @@ fun runHeadlessApplicationBlocking(
                     stacktrace = throwable.stackTrace.toList()
                 ).send()
             }) {
+
         runHeadlessApplication(timeout, width, height, content)
     }
 }

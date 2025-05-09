@@ -15,13 +15,17 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.withAsyncTrace
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ShutdownRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationServer
 import org.jetbrains.compose.reload.orchestration.asChannel
@@ -123,8 +127,17 @@ internal constructor(
              */
             daemonTestScope.launch {
                 val logger = LoggerFactory.getLogger("Orchestration")
-                orchestration.asFlow().filterIsInstance<OrchestrationMessage.LogMessage>().collect { message ->
+                orchestration.asFlow().filterIsInstance<LogMessage>().collect { message ->
                     logger.debug(message.toString())
+                }
+            }
+
+            /* Forward all build outputs */
+            daemonTestScope.launch {
+                val stderr = gradleRunner.stderrChannel?.receiveAsFlow() ?: emptyFlow()
+                val stdout = gradleRunner.stdoutChannel?.receiveAsFlow() ?: emptyFlow()
+                merge(stderr, stdout).collect { message ->
+                    orchestration.sendMessage(LogMessage(LogMessage.TAG_COMPILER, message)).get()
                 }
             }
 

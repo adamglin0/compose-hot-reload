@@ -13,6 +13,7 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.slf4j.LoggerFactory
 import java.lang.invoke.MethodHandles
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
 private val logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass())
 
@@ -38,7 +39,7 @@ public fun screenshotTestApplication(
     }
 
     runHeadlessApplicationBlocking(
-        timeout.minutes, width = width, height = height, content = {
+        timeout.minutes, silenceTimeout = 30.seconds, width = width, height = height, content = {
             content()
         }
     )

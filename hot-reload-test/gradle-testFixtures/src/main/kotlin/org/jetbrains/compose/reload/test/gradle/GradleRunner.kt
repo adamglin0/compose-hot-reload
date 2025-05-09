@@ -6,6 +6,7 @@
 package org.jetbrains.compose.reload.test.gradle
 
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.currentCoroutineContext
@@ -25,11 +26,13 @@ import kotlin.test.fail
 
 private val logger = LoggerFactory.getLogger("Gradle")
 
-public data class GradleRunner @InternalHotReloadTestApi constructor(
-    val projectRoot: Path,
-    val gradleVersion: String,
-    val arguments: List<String> = emptyList(),
-    val gradleHome: Path = Path("build/gradleHome"),
+public class GradleRunner @InternalHotReloadTestApi constructor(
+    public val projectRoot: Path,
+    public val gradleVersion: String,
+    public val arguments: List<String> = emptyList(),
+    public val gradleHome: Path = Path("build/gradleHome"),
+    internal val stdoutChannel: Channel<String>? = null,
+    internal val stderrChannel: Channel<String>? = null,
 ) {
     @JvmInline
     public value class ExitCode internal constructor(public val value: Int) {
@@ -93,7 +96,7 @@ public suspend fun GradleRunner.build(
                 while (true) {
                     val stdoutLine = reader.readLine() ?: break
                     stdout?.trySendBlocking(stdoutLine)
-                    logger.debug(stdoutLine)
+                    this.stderrChannel?.trySendBlocking(stdoutLine)
                 }
             }
         }
@@ -103,7 +106,7 @@ public suspend fun GradleRunner.build(
                 while (true) {
                     val stderrLine = reader.readLine() ?: break
                     stderr?.trySendBlocking(stderrLine)
-                    logger.debug(stderrLine)
+                    this.stderrChannel?.trySendBlocking(stderrLine)
                 }
             }
         }

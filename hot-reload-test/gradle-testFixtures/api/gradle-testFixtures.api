@@ -53,10 +53,6 @@ public final class org/jetbrains/compose/reload/test/gradle/BuildGradleKtsExtens
 	public static fun plugins (Lorg/jetbrains/compose/reload/test/gradle/BuildGradleKtsExtension;Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
 }
 
-public final class org/jetbrains/compose/reload/test/gradle/BuildGradleKtsExtensionKt {
-	public static final fun renderBuildGradleKts (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
-}
-
 public final class org/jetbrains/compose/reload/test/gradle/BuildMode : java/lang/Enum, org/jetbrains/compose/reload/test/gradle/HotReloadTestDimension {
 	public static final field Companion Lorg/jetbrains/compose/reload/test/gradle/BuildMode$Companion;
 	public static final field Continuous Lorg/jetbrains/compose/reload/test/gradle/BuildMode;
@@ -105,10 +101,6 @@ public abstract interface annotation class org/jetbrains/compose/reload/test/gra
 
 public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/ExtendHotReloadTestDimension$Container : java/lang/annotation/Annotation {
 	public abstract fun value ()[Lorg/jetbrains/compose/reload/test/gradle/ExtendHotReloadTestDimension;
-}
-
-public final class org/jetbrains/compose/reload/test/gradle/FileUtilsKt {
-	public static final fun replaceText (Ljava/nio/file/Path;Ljava/lang/String;Ljava/lang/String;)V
 }
 
 public abstract class org/jetbrains/compose/reload/test/gradle/GradleBuildEvent {
@@ -182,21 +174,10 @@ public abstract interface class org/jetbrains/compose/reload/test/gradle/GradleP
 }
 
 public final class org/jetbrains/compose/reload/test/gradle/GradleRunner {
-	public fun <init> (Ljava/nio/file/Path;Ljava/lang/String;Ljava/util/List;Ljava/nio/file/Path;)V
-	public synthetic fun <init> (Ljava/nio/file/Path;Ljava/lang/String;Ljava/util/List;Ljava/nio/file/Path;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Ljava/nio/file/Path;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Ljava/util/List;
-	public final fun component4 ()Ljava/nio/file/Path;
-	public final fun copy (Ljava/nio/file/Path;Ljava/lang/String;Ljava/util/List;Ljava/nio/file/Path;)Lorg/jetbrains/compose/reload/test/gradle/GradleRunner;
-	public static synthetic fun copy$default (Lorg/jetbrains/compose/reload/test/gradle/GradleRunner;Ljava/nio/file/Path;Ljava/lang/String;Ljava/util/List;Ljava/nio/file/Path;ILjava/lang/Object;)Lorg/jetbrains/compose/reload/test/gradle/GradleRunner;
-	public fun equals (Ljava/lang/Object;)Z
 	public final fun getArguments ()Ljava/util/List;
 	public final fun getGradleHome ()Ljava/nio/file/Path;
 	public final fun getGradleVersion ()Ljava/lang/String;
 	public final fun getProjectRoot ()Ljava/nio/file/Path;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
 }
 
 public final class org/jetbrains/compose/reload/test/gradle/GradleRunner$ExitCode {
@@ -348,13 +329,6 @@ public final class org/jetbrains/compose/reload/test/gradle/LaunchApplicationKt 
 	public static synthetic fun launchApplication$default (Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
 }
 
-public final class org/jetbrains/compose/reload/test/gradle/LaunchDevApplicationKt {
-	public static final fun launchDevApplication (Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
-	public static synthetic fun launchDevApplication$default (Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
-	public static final fun launchDevApplicationAndWait (Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun launchDevApplicationAndWait$default (Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-}
-
 public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/MaxKotlinVersion : java/lang/annotation/Annotation {
 	public abstract fun version ()Ljava/lang/String;
 }
@@ -417,11 +391,6 @@ public final class org/jetbrains/compose/reload/test/gradle/ProjectSetupExtensio
 	public static fun values ()[Lorg/jetbrains/compose/reload/test/gradle/ProjectSetupExtension$Result;
 }
 
-public final class org/jetbrains/compose/reload/test/gradle/RegexAssertionKt {
-	public static final fun assertMatchesRegex (Ljava/lang/String;Ljava/lang/String;)V
-	public static final fun assertMatchesRegex (Ljava/lang/String;Lkotlin/text/Regex;)V
-}
-
 public abstract interface class org/jetbrains/compose/reload/test/gradle/SettingsGradleKtsExtension {
 	public abstract fun dependencyResolutionManagement (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
 	public abstract fun dependencyResolutionManagementRepositories (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
@@ -442,10 +411,6 @@ public final class org/jetbrains/compose/reload/test/gradle/SettingsGradleKtsExt
 	public static fun pluginManagementPlugins (Lorg/jetbrains/compose/reload/test/gradle/SettingsGradleKtsExtension;Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
 	public static fun pluginManagementRepositories (Lorg/jetbrains/compose/reload/test/gradle/SettingsGradleKtsExtension;Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
 	public static fun plugins (Lorg/jetbrains/compose/reload/test/gradle/SettingsGradleKtsExtension;Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
-}
-
-public final class org/jetbrains/compose/reload/test/gradle/SettingsGradleKtsExtensionKt {
-	public static final fun renderSettingsGradleKts (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
 }
 
 public abstract interface class org/jetbrains/compose/reload/test/gradle/SettingsGradleKtsRepositoriesExtension {

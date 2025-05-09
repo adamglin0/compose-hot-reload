@@ -78,10 +78,7 @@ internal abstract class StatusService : BuildService<StatusService.Params>, Oper
 
     private val clients = AtomicReference<List<OrchestrationClient>>(emptyList())
 
-
     init {
-        clients.getAndSet(emptyList()).forEach { it.closeGracefully() }
-
         clients.set(parameters.ports.get().mapNotNull { port ->
             runCatching { connectOrchestrationClient(OrchestrationClientRole.Compiler, port) }.getOrNull()
         }.onEach { client ->

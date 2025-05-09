@@ -173,7 +173,12 @@ public class TransactionScope internal constructor(
         }
     }
 
-^    public suspend fun requestReload(): Iterable<GradleBuildEvent> = withAsyncTrace("'reload'") {
+    public suspend fun requestAndAwaitReload(): Unit = withAsyncTrace("'requestAndAwaitReload'") {
+        requestReload()
+        awaitReload()
+    }
+
+    public suspend fun requestReload(): Iterable<GradleBuildEvent> = withAsyncTrace("'reload'") {
         fixture.gradleRunner.buildFlow("reload").toList().assertSuccessful()
     }
 

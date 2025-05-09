@@ -319,7 +319,7 @@ class ScreenshotTests {
         fixture.runTransaction {
             fixture.replaceSourceCode("// add field", "val bar = 1902")
             fixture.replaceSourceCode("\$foo", "\$bar")
-            awaitReload()
+            requestAndAwaitReload()
         }
 
         fixture.checkScreenshot("1-after")
@@ -613,8 +613,7 @@ class ScreenshotTests {
         fixture.runTransaction {
             replaceSourceCode("// add C entry", "C,")
             replaceSourceCode("// add C case", "Tab.C -> TestText(\"C\")")
-            requestReload()
-            awaitReload()
+            requestAndAwaitReload()
         }
         fixture.checkScreenshot("1-after-c-added")
 

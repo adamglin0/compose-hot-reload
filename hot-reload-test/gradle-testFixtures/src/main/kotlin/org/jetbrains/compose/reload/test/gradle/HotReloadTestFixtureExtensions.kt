@@ -54,6 +54,11 @@ public suspend fun HotReloadTestFixture.replaceSourceCodeAndReload(
 
 public suspend fun HotReloadTestFixture.requestReload(): Unit = runTransaction { requestReload() }
 
+public suspend fun HotReloadTestFixture.requestAndAwaitReload(): Unit = runTransaction {
+    requestReload()
+    awaitReload()
+}
+
 public fun HotReloadTestFixture.getDefaultMainKtSourceFile(): String {
     return when (projectMode) {
         ProjectMode.Kmp -> "src/commonMain/kotlin/Main.kt"

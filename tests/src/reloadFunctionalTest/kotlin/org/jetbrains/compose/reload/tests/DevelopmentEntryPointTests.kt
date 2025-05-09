@@ -66,13 +66,13 @@ class DevelopmentEntryPointTests {
 
         fixture.runTransaction {
             devKt.replaceText("Foo", "Bar")
-            awaitReload()
+            requestAndAwaitReload()
             fixture.checkScreenshot("1-change-in-devKt")
         }
 
         fixture.runTransaction {
             mainKt.replaceText("Before", "After")
-            awaitReload()
+            requestAndAwaitReload()
             fixture.checkScreenshot("2-change-in-mainKt")
         }
     }

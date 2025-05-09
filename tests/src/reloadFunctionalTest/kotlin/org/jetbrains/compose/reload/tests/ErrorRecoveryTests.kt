@@ -43,7 +43,7 @@ class ErrorRecoveryTests {
 
         fixture.runTransaction {
             code.replaceText("""error("Foo")""", """TestText("Recovered")""")
-            awaitReload()
+            requestAndAwaitReload()
             fixture.checkScreenshot("1-recovered")
         }
     }
@@ -122,7 +122,7 @@ class ErrorRecoveryTests {
          */
         fixture.runTransaction {
             code.replaceText("Before:", "After:")
-            awaitReload()
+            requestAndAwaitReload()
             fixture.checkScreenshot("3-after-change")
         }
     }

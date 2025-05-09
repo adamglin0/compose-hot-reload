@@ -66,7 +66,11 @@ private class OrchestrationServerImpl(
                 isDaemon = true,
                 start = false
             ) {
-                runnable.run()
+                try {
+                    runnable.run()
+                } catch (t: Throwable) {
+                    logger.error("'writerThread' exception", t)
+                }
             }
         }
 
@@ -108,9 +112,9 @@ private class OrchestrationServerImpl(
             try {
                 action(message)
             } catch (t: Throwable) {
-                assert(false) { throw t }
                 logger.error("Failed invoking orchestration listener", t)
                 logger.error("Failing listener was registered at:", registration)
+                assert(false) { throw t }
             }
         }
         lock.withLock { listeners.add(safeListener) }
@@ -127,7 +131,7 @@ private class OrchestrationServerImpl(
     }
 
     override fun sendMessage(message: OrchestrationMessage): Future<Unit> = orchestrationThread.submitSafe {
-        /* Send the message to all, currently connected clients */
+        /* Send the message to all currently connected clients */
         val clients = lock.withLock { clients.toList() }
         clients.forEach { client -> client.write(message) }
 
@@ -251,7 +255,6 @@ private class OrchestrationServerImpl(
             clients.forEach { it.close() }
             clients.clear()
             serverSocket.close()
-            orchestrationThread.shutdownNow()
         }
     }
 }

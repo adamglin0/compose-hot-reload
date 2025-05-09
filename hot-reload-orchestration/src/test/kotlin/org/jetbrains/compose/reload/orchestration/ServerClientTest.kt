@@ -5,19 +5,28 @@
 
 package org.jetbrains.compose.reload.orchestration
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.channels.toList
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole.Unknown
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientConnected
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientDisconnected
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.TestEvent
 import org.junit.jupiter.api.AfterEach
 import java.util.Collections.synchronizedList
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.fail
 
 class ServerClientTest {
 
@@ -150,5 +159,81 @@ class ServerClientTest {
         val disconnected = serverChannel.receiveAsFlow().filterIsInstance<ClientDisconnected>().first()
         assertEquals(client.clientId, disconnected.clientId)
         assertEquals(Unknown, disconnected.clientRole)
+    }
+
+    @Test
+    fun `stress test - incoming message flood`() = runTest {
+        repeat(8) { iteration ->
+            val senderCoroutines = 8
+            val messagesPerSender = 512
+            val elements = senderCoroutines * messagesPerSender
+
+            val server = use(startOrchestrationServer())
+            val client = use(connectOrchestrationClient(Unknown, server.port))
+
+            val incomingFlow = client.asFlow()
+            val incomingChannel = client.asChannel()
+            val incomingQueue = client.asBlockingQueue()
+
+            val flowAllowCollecting = Job()
+            val fromFlowAsync = async {
+                incomingFlow.map { message ->
+                    flowAllowCollecting.join()
+                    message
+                }.toList()
+            }
+
+            /* Ensure all registrations are present */
+            testScheduler.advanceUntilIdle()
+
+            coroutineScope {
+                repeat(senderCoroutines) { coroutineId ->
+                    launch(Dispatchers.IO) {
+                        repeat(messagesPerSender) { iterationId ->
+                            val event = TestEvent(listOf(coroutineId, iterationId))
+                            server.sendMessage(event).get()
+                        }
+                    }
+                }
+            }
+
+            /* Allow the flow to collect messages */
+            flowAllowCollecting.complete()
+
+            /* Sync client and server */
+            run {
+                val syncChannel = client.asChannel()
+                val ping = OrchestrationMessage.Ping()
+                server.sendMessage(ping)
+                syncChannel.receiveAsFlow().first { it == ping }
+            }
+
+            server.close()
+
+            val fromChannel = incomingChannel.toList()
+            val fromQueue = buildList(elements) {
+                while (true) {
+                    incomingQueue.poll()?.let(::add) ?: break
+                }
+            }
+
+            val expectedEvents = (0 until senderCoroutines).flatMap { coroutineId ->
+                (0 until messagesPerSender).map { iterationId ->
+                    TestEvent(listOf(coroutineId, iterationId))
+                }
+            }.toSet()
+
+            fromChannel.containsAll(expectedEvents)
+                || fail("Channel (${fromChannel.size}) did not receive all messages | iteration : $iteration")
+
+            fromQueue.containsAll(expectedEvents)
+                || fail("Queue (${fromQueue.size})  did not receive all messages | iteration : $iteration")
+
+            fromFlowAsync.await().containsAll(expectedEvents)
+                || fail("Flow(${fromFlowAsync.await().size}) did not receive all messages | iteration : $iteration")
+
+            client.close()
+            testScheduler.advanceUntilIdle()
+        }
     }
 }

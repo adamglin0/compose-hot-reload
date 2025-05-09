@@ -8,6 +8,7 @@ package org.jetbrains.compose.reload.orchestration
 import org.jetbrains.compose.reload.core.Disposable
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
 import org.jetbrains.compose.reload.core.submitSafe
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientConnected
 import org.slf4j.LoggerFactory
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
@@ -28,9 +29,7 @@ public interface OrchestrationClient : OrchestrationHandle {
 }
 
 public fun OrchestrationClient(role: OrchestrationClientRole): OrchestrationClient? {
-    val port = HotReloadEnvironment.orchestrationPort
-    if (port == null) return null
-
+    val port = HotReloadEnvironment.orchestrationPort ?: return null
     return connectOrchestrationClient(role, port = port)
 }
 
@@ -39,7 +38,7 @@ public fun connectOrchestrationClient(role: OrchestrationClientRole, port: Int):
 
     socket.keepAlive = true
     val client = OrchestrationClientImpl(role, socket, port)
-    client.start()
+    client.start().get()
     return client
 }
 
@@ -89,9 +88,19 @@ private class OrchestrationClientImpl(
 
 
     override fun invokeWhenMessageReceived(action: (OrchestrationMessage) -> Unit): Disposable {
-        lock.withLock { listeners.add(action) }
+        val safeListener: (OrchestrationMessage) -> Unit = { message ->
+            try {
+                action(message)
+            } catch (t: Throwable) {
+                logger.error("Failed invoking orchestration listener", t)
+                assert(false) { throw t }
+            }
+        }
+
+        lock.withLock { listeners.add(safeListener) }
+
         return Disposable {
-            lock.withLock { listeners.remove(action) }
+            lock.withLock { listeners.remove(safeListener) }
         }
     }
 
@@ -106,20 +115,25 @@ private class OrchestrationClientImpl(
         return writer.sendMessage(message)
     }
 
-    fun start() {
-        writer.sendMessage(OrchestrationHandshake(clientId, role, ProcessHandle.current().pid()))
+    fun start(): Future<Unit> {
+        val isReady = CompletableFuture<Unit>()
+        val handshake = OrchestrationHandshake(clientId, role, ProcessHandle.current().pid())
+        writer.sendMessage(handshake)
 
         thread(name = "Orchestration Client Reader") {
             logger.debug("connected")
 
             try {
                 val input = ObjectInputStream(socket.getInputStream().buffered())
-
                 while (isActive) {
                     val message = input.readObject()
                     if (message !is OrchestrationMessage) {
                         logger.debug("Unknown message received '$message'")
                         continue
+                    }
+
+                    if (message is ClientConnected && message.clientId == clientId) {
+                        isReady.complete(Unit)
                     }
 
                     /* Notify orchestration thread about the message */
@@ -129,11 +143,16 @@ private class OrchestrationClientImpl(
                     }.get()
                 }
             } catch (t: Throwable) {
-                logger.debug("reader: closing client")
+                if (!isReady.isDone) {
+                    isReady.completeExceptionally(t)
+                }
+                logger.debug("reader: closing client (${t::class.simpleName})")
                 logger.trace("reader: closed with traces", t)
                 close()
             }
         }
+
+        return isReady
     }
 
     override fun close() {

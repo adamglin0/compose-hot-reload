@@ -8,32 +8,56 @@ package org.jetbrains.compose.reload.orchestration
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.channelFlow
+import org.jetbrains.compose.reload.core.Disposable
+import java.lang.ref.WeakReference
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.atomic.AtomicReference
 
 public fun OrchestrationHandle.asBlockingQueue(): BlockingQueue<OrchestrationMessage> {
     val queue = LinkedBlockingQueue<OrchestrationMessage>()
-    invokeWhenMessageReceived { message -> queue.put(message) }
+    val queueReference = WeakReference(queue)
+    val registration = AtomicReference<Disposable>(null)
+    registration.set(invokeWhenMessageReceived { message ->
+        val queue = queueReference.get()
+        if (queue == null) {
+            registration.getAndSet(null)?.dispose()
+        } else {
+            queue.put(message)
+        }
+    })
     return queue
 }
 
 public fun OrchestrationHandle.asFlow(): Flow<OrchestrationMessage> = channelFlow {
     val registration = invokeWhenMessageReceived { message ->
-        trySendBlocking(message)
+        val result = trySend(message)
+        if (!result.isClosed) {
+            result.getOrThrow()
+        }
+    }
+
+    invokeWhenClosed {
+        close()
     }
 
     awaitClose {
         registration.dispose()
     }
-}
+}.buffer(Channel.UNLIMITED)
 
 public fun OrchestrationHandle.asChannel(): ReceiveChannel<OrchestrationMessage> {
     val channel = Channel<OrchestrationMessage>(Channel.UNLIMITED)
-    val registration = invokeWhenMessageReceived { message -> channel.trySendBlocking(message) }
-    channel.invokeOnClose { cause -> registration.dispose() }
+    val registration = invokeWhenMessageReceived { message ->
+        val result = channel.trySend(message)
+        if (!result.isClosed) {
+            result.getOrThrow()
+        }
+    }
+    channel.invokeOnClose { registration.dispose() }
     invokeWhenClosed { channel.close() }
     return channel
 }

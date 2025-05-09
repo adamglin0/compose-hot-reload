@@ -21,6 +21,7 @@ import kotlin.io.path.Path
 import kotlin.io.path.copyTo
 import kotlin.io.path.createDirectories
 import kotlin.io.path.createParentDirectories
+import kotlin.io.path.exists
 import kotlin.io.path.writeText
 import kotlin.test.fail
 
@@ -142,7 +143,8 @@ public suspend fun GradleRunner.build(
 }
 
 private fun GradleRunner.createWrapperPropertiesFile() {
-    projectRoot.resolve("gradle/wrapper/gradle-wrapper.properties").createParentDirectories().writeText(
+    val properties = projectRoot.resolve("gradle/wrapper/gradle-wrapper.properties").createParentDirectories()
+    properties.writeText(
         """
         distributionBase=GRADLE_USER_HOME
         distributionPath=wrapper/dists
@@ -159,10 +161,18 @@ private fun GradleRunner.createWrapperPropertiesFile() {
 private fun GradleRunner.copyGradleWrapper() {
     projectRoot.createDirectories()
 
-    gradleWrapperFile().copyTo(projectRoot.resolve("gradlew"), overwrite = true)
-    gradleWrapperBatFile().copyTo(projectRoot.resolve("gradlew.bat"), overwrite = true)
-    gradleWrapperJarFile().copyTo(
-        projectRoot.resolve("gradle/wrapper/gradle-wrapper.jar").createParentDirectories(),
-        overwrite = true
-    )
+    val gradlew = projectRoot.resolve("gradlew")
+    if (!gradlew.exists()) {
+        gradleWrapperFile().copyTo(gradlew, overwrite = true)
+    }
+
+    val gradlewBat = projectRoot.resolve("gradlew.bat")
+    if (!gradlewBat.exists()) {
+        gradleWrapperBatFile().copyTo(projectRoot.resolve("gradlew.bat"), overwrite = true)
+    }
+
+    val gradlewWrapperJar = projectRoot.resolve("gradle/wrapper/gradle-wrapper.jar")
+    if (!gradlewWrapperJar.exists()) {
+        gradleWrapperJarFile().copyTo(gradlewWrapperJar, overwrite = true)
+    }
 }

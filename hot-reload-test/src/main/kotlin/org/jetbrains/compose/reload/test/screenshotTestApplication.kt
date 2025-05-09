@@ -14,8 +14,7 @@ import org.slf4j.LoggerFactory
 import java.lang.invoke.MethodHandles
 import kotlin.time.Duration.Companion.minutes
 
-internal val logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass())
-
+private val logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass())
 
 /**
  * Entry points for "Applications under test"

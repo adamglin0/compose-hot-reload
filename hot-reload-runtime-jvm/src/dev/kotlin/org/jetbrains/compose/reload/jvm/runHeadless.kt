@@ -45,6 +45,7 @@ import javax.imageio.ImageIO
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
+private val logger = createLogger()
 
 @InternalHotReloadApi
 suspend fun runHeadlessApplication(
@@ -52,7 +53,6 @@ suspend fun runHeadlessApplication(
     content: @Composable () -> Unit
 ): Unit = coroutineScope {
     val applicationScope = this
-    val logger = createLogger()
     val messages = orchestration.asChannel()
 
     val scene = ImageComposeScene(width, height, coroutineContext = applicationScope.coroutineContext)
@@ -74,6 +74,7 @@ suspend fun runHeadlessApplication(
     applicationScope.launch {
         var time = 0L
         val delay = 256.milliseconds
+        var silence = 0.milliseconds
 
         while (isActive) {
             time += delay.inWholeNanoseconds
@@ -88,15 +89,22 @@ suspend fun runHeadlessApplication(
                 onTimeout(delay) { null }
             }
 
+            if (message == null) {
+                silence += delay
+                if (silence.inWholeSeconds >= 5 && silence.inWholeSeconds % 5 == 0L) {
+                    logger.warn("No message received for $silence")
+                }
+                continue
+            }
+
+            silence = 0.milliseconds
+
             if (message is ShutdownRequest) {
                 applicationScope.coroutineContext.job.cancelChildren()
                 return@launch
             }
 
-            if (message != null &&
-                message !is OrchestrationMessage.Ack &&
-                message !is OrchestrationMessage.LogMessage
-            ) {
+            if (message !is OrchestrationMessage.Ack && message !is OrchestrationMessage.LogMessage) {
                 orchestration.sendMessage(OrchestrationMessage.Ack(message.messageId)).get()
             }
 
@@ -106,10 +114,11 @@ suspend fun runHeadlessApplication(
             }
 
             if (message is OrchestrationMessage.TakeScreenshotRequest) {
+                logger.info("Taking screenshot: '${message.messageId}'")
                 val baos = ByteArrayOutputStream()
                 ImageIO.write(scene.render(time).toComposeImageBitmap().toAwtImage(), "png", baos)
                 orchestration.sendMessage(OrchestrationMessage.Screenshot("png", baos.toByteArray())).get()
-                logger.debug("Screenshot sent")
+                logger.debug("Sent screenshot: '${message.messageId}'")
             }
         }
 

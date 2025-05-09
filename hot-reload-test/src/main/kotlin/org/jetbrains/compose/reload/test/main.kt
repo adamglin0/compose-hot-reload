@@ -9,12 +9,13 @@
 package org.jetbrains.compose.reload.test
 
 import org.jetbrains.compose.reload.agent.send
+import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
-import java.io.File
 import java.lang.reflect.InvocationTargetException
-import java.net.URLClassLoader
 import kotlin.system.exitProcess
+
+private val logger = createLogger()
 
 internal enum class ExitCode(val value: Int) {
     Success(0),

@@ -60,9 +60,9 @@ public class TransactionScope internal constructor(
     internal val logger: Logger = createLogger()
 
     public fun OrchestrationMessage.send() {
-        logger.debug("sending message: $this")
+        logger.debug("Sending message: $this")
         fixture.orchestration.sendMessage(this).get()
-        logger.debug("message sent: $this")
+        logger.debug("Sent message: $this")
     }
 
     public suspend fun launchChildTransaction(block: suspend TransactionScope.() -> Unit): Job {

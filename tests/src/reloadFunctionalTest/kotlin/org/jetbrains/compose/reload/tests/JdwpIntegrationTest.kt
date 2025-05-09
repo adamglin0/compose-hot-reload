@@ -13,17 +13,17 @@ import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.test.gradle.BuildGradleKtsExtension
 import org.jetbrains.compose.reload.test.gradle.BuildMode
 import org.jetbrains.compose.reload.test.gradle.ExtendBuildGradleKts
-import org.jetbrains.compose.reload.test.gradle.ExtendHotReloadTestDimension
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
-import org.jetbrains.compose.reload.test.gradle.HotReloadTestDimensionExtension
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
-import org.jetbrains.compose.reload.test.gradle.HotReloadTestInvocationContext
 import org.jetbrains.compose.reload.test.gradle.TestedBuildMode
 import org.jetbrains.compose.reload.test.gradle.checkScreenshot
 import org.jetbrains.compose.reload.test.gradle.initialSourceCode
+import org.jetbrains.compose.reload.utils.QuickTest
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtensionContext
+import org.junit.jupiter.api.parallel.Execution
+import org.junit.jupiter.api.parallel.ExecutionMode
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.tree.ClassNode
@@ -48,9 +48,10 @@ import kotlin.test.DefaultAsserter.fail
  * 6) Check an 'After' screenshot, asserting that the UI has been refreshed successfully.
  */
 @ExtendBuildGradleKts(JdwpExtension::class)
-@ExtendHotReloadTestDimension(JdwpExtension::class)
 @TestedBuildMode(BuildMode.Continuous)
 @TestedBuildMode(BuildMode.Explicit)
+@Execution(ExecutionMode.SAME_THREAD, reason = "Sharing the virtualMachineManager")
+@QuickTest
 class JdwpIntegrationTest {
 
     val connector: ListeningConnector = run {
@@ -126,19 +127,12 @@ class JdwpIntegrationTest {
     }
 }
 
-internal object JdwpExtension : BuildGradleKtsExtension, HotReloadTestDimensionExtension {
-    override fun javaExecConfigure(context: ExtensionContext): String? {
+internal object JdwpExtension : BuildGradleKtsExtension {
+    override fun javaExecConfigure(context: ExtensionContext): String {
         val instance = context.testInstance.get() as JdwpIntegrationTest
 
         return """
             jvmArgs("-agentlib:jdwp=transport=dt_socket,server=n,suspend=y,address=${instance.address}")
         """.trimIndent()
-    }
-
-    override fun transform(
-        context: ExtensionContext,
-        tests: List<HotReloadTestInvocationContext>
-    ): List<HotReloadTestInvocationContext> {
-        return tests.takeLast(1)
     }
 }

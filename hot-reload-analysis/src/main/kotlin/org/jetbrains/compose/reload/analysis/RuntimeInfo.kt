@@ -11,6 +11,7 @@ package org.jetbrains.compose.reload.analysis
 import org.jetbrains.compose.reload.core.withClosure
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.tree.ClassNode
+import org.objectweb.asm.tree.MethodInsnNode
 import org.objectweb.asm.tree.MethodNode
 
 sealed interface RuntimeInfo {
@@ -117,13 +118,15 @@ internal fun ClassInfo(classNode: ClassNode): ClassInfo? {
 internal fun RuntimeScopeInfo(classNode: ClassNode, methodNode: MethodNode): RuntimeScopeInfo? {
     val methodId = MethodId(classNode, methodNode)
     val runtimeInstructionTree = parseRuntimeInstructionTreeLenient(methodId, methodNode)
-    return createRuntimeScopeInfo(methodId, runtimeInstructionTree)
+    val isComposeEntry = isComposeEntry(methodNode)
+    return createRuntimeScopeInfo(methodId, runtimeInstructionTree, isComposeEntry)
 }
 
 
 internal fun createRuntimeScopeInfo(
     methodId: MethodId,
     tree: RuntimeInstructionTree,
+    isComposeEntry: Boolean,
 ): RuntimeScopeInfo {
     return RuntimeScopeInfo(
         methodId = methodId,
@@ -131,7 +134,24 @@ internal fun createRuntimeScopeInfo(
         group = tree.group,
         methodDependencies = tree.methodDependencies(),
         fieldDependencies = tree.fieldDependencies(),
-        children = tree.children.map { child -> createRuntimeScopeInfo(methodId, child) },
-        hash = tree.codeHash()
+        children = tree.children.map { child -> createRuntimeScopeInfo(methodId, child, false) },
+        hash = tree.codeHash(),
+        isComposeEntry = isComposeEntry
     )
+}
+
+private val COMPOSE_APP_ENTRIES = setOf(
+    Ids.WindowDesktopKt.singleWindowApplication,
+    Ids.WindowDesktopKt.singleWindowApplication_default,
+    Ids.ApplicationDesktopKt.application,
+    Ids.ApplicationDesktopKt.application_default,
+    Ids.ScreenshotTestApplicationKt.screenshotTestApplication,
+    Ids.ScreenshotTestApplicationKt.screenshotTestApplication_default,
+)
+
+private fun isComposeEntry(methodNode: MethodNode): Boolean {
+    return methodNode.instructions.any {
+        it is MethodInsnNode &&
+            MethodId(ClassId(it.owner), it.name, it.desc) in COMPOSE_APP_ENTRIES
+    }
 }

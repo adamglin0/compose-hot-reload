@@ -13,4 +13,5 @@ data class RuntimeScopeInfo(
     val fieldDependencies: Set<FieldId>,
     val children: List<RuntimeScopeInfo>,
     val hash: RuntimeInstructionTreeCodeHash,
+    val isComposeEntry: Boolean,
 )

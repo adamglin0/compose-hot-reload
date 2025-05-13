@@ -48,6 +48,14 @@ private fun RuntimeInfo.resolveDirtyRuntimeScopeInfos(redefined: RuntimeInfo): L
 private fun RuntimeInfo.resolveDirtyMethods(redefined: RuntimeInfo): List<MethodInfo> {
     return redefined.methodIndex.mapNotNull { (methodId, redefinedMethod) ->
         val previousMethod = methodIndex[methodId] ?: return@mapNotNull redefinedMethod
+        if (redefinedMethod.rootScope.isComposeEntry) {
+            throw IllegalStateException(
+                """
+                Compose Hot Reload does not support the redefinition of compose entry method $methodId.
+                Please use 'Restart' option to load the new changes
+                """.trimIndent()
+            )
+        }
         if (previousMethod.rootScope.hash != redefinedMethod.rootScope.hash) {
             return@mapNotNull redefinedMethod
         }

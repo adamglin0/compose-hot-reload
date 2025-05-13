@@ -21,7 +21,7 @@ private val logger = createLogger()
 data class Reload(
     val reloadRequestId: UUID,
     val definitions: List<ClassDefinition>,
-    val dirtyRuntime: RuntimeDirtyScopes
+    val dirtyRuntime: RuntimeDirtyScopes,
 )
 
 internal fun reload(

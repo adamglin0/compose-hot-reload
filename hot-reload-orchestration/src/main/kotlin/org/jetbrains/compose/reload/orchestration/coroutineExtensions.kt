@@ -10,7 +10,7 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.buffer
-import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.callbackFlow
 import org.jetbrains.compose.reload.core.Disposable
 import java.lang.ref.WeakReference
 import java.util.concurrent.BlockingQueue
@@ -32,7 +32,7 @@ public fun OrchestrationHandle.asBlockingQueue(): BlockingQueue<OrchestrationMes
     return queue
 }
 
-public fun OrchestrationHandle.asFlow(): Flow<OrchestrationMessage> = channelFlow {
+public fun OrchestrationHandle.asFlow(): Flow<OrchestrationMessage> = callbackFlow {
     val registration = invokeWhenMessageReceived { message ->
         val result = trySend(message)
         if (!result.isClosed) {

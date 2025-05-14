@@ -139,7 +139,7 @@ private class OrchestrationClientImpl(
             }
         }
 
-        thread(name = "Orchestration Client Reader") {
+        val reader = thread(name = "Orchestration Client Reader") {
             logger.debug("connected")
 
             try {
@@ -148,6 +148,9 @@ private class OrchestrationClientImpl(
                     val message = input.readObject()
                     if (message !is OrchestrationMessage) {
                         logger.debug("Unknown message received '$message'")
+                        if (!isReady.isDone) {
+                            isReady.completeExceptionally(IllegalStateException("Unknown message received"))
+                        }
                         continue
                     }
 
@@ -155,7 +158,7 @@ private class OrchestrationClientImpl(
                         isReady.complete(Unit)
                     }
 
-                    /* Notify orchestration thread about the message */
+                    /* Notify the orchestration thread about the message */
                     orchestrationThread.submit {
                         val listeners = lock.withLock { listeners.toList() }
                         listeners.forEach { listener -> listener(message) }
@@ -168,6 +171,12 @@ private class OrchestrationClientImpl(
                 logger.debug("reader: closing client (${t::class.simpleName})")
                 logger.trace("reader: closed with traces", t)
                 close()
+            }
+        }
+
+        invokeWhenClosed {
+            if (reader.isAlive) {
+                reader.interrupt()
             }
         }
 

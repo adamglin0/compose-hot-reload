@@ -71,7 +71,7 @@ fun ClassId(bytecode: ByteArray): ClassId? {
     return className?.let { name -> ClassId(name) }
 }
 
-internal fun ClassId(node: ClassNode): ClassId = ClassId(node.name)
+fun ClassId(node: ClassNode): ClassId = ClassId(node.name)
 
 internal fun MethodId(classNode: ClassNode, methodNode: MethodNode): MethodId = MethodId(
     classId = ClassId(classNode),

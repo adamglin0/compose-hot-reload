@@ -27,5 +27,10 @@ public enum class OrchestrationClientRole : Serializable {
     /**
      * Can be any generic client (e.g. tooling which is listening for messages in the orchestration)
      */
-    Unknown
+    Unknown;
+
+    internal companion object {
+        @Suppress("unused")
+        internal const val serialVersionUID: Long = 0L
+    }
 }

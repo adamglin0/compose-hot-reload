@@ -16,7 +16,12 @@ public sealed class OrchestrationMessage : Serializable {
      * Requests that all participants in the orchestration are supposed to shut down.
      * Note: Closing the [OrchestrationServer] is also supposed to close all clients.
      */
-    public data class ShutdownRequest(public val reason: String? = null) : OrchestrationMessage()
+    public data class ShutdownRequest(public val reason: String? = null) : OrchestrationMessage() {
+        internal companion object {
+            @Suppress("unused")
+            internal const val serialVersionUID: Long = 0L
+        }
+    }
 
     /**
      * Sent once a new connection with a client was established
@@ -27,6 +32,11 @@ public sealed class OrchestrationMessage : Serializable {
         public val clientRole: OrchestrationClientRole,
         public val clientPid: Long? = null
     ) : OrchestrationMessage() {
+        internal companion object {
+            @Suppress("unused")
+            internal const val serialVersionUID: Long = 0L
+        }
+
         override fun toString(): String {
             return "ClientConnected($clientRole)"
         }
@@ -40,6 +50,12 @@ public sealed class OrchestrationMessage : Serializable {
         public val clientId: UUID,
         public val clientRole: OrchestrationClientRole,
     ) : OrchestrationMessage() {
+
+        internal companion object {
+            @Suppress("unused")
+            internal const val serialVersionUID: Long = 0L
+        }
+
         override fun toString(): String {
             return "ClientDisconnected($clientRole)"
         }
@@ -59,13 +75,23 @@ public sealed class OrchestrationMessage : Serializable {
      * Note: This message can be sent multiple times!
      */
     @Deprecated("This message is not required anymore")
-    public class RecompilerReady : OrchestrationMessage()
+    public class RecompilerReady : OrchestrationMessage() {
+        internal companion object {
+            @Suppress("unused")
+            internal const val serialVersionUID: Long = 0L
+        }
+    }
 
     /**
      * If the compilation is not setup 'continuously', then a [RecompileRequest] will signal to
      * start a compile-step potentially leading to a reload (if the classes have changed)
      */
-    public class RecompileRequest : OrchestrationMessage()
+    public class RecompileRequest : OrchestrationMessage() {
+        internal companion object {
+            @Suppress("unused")
+            internal const val serialVersionUID: Long = 0L
+        }
+    }
 
     /**
      * Response to a given [RecompileRequest].
@@ -78,13 +104,33 @@ public sealed class OrchestrationMessage : Serializable {
          * was interrupted before finishing.
          */
         public val exitCode: Int?
-    ) : OrchestrationMessage()
+    ) : OrchestrationMessage() {
+        internal companion object {
+            @Suppress("unused")
+            internal const val serialVersionUID: Long = 0L
+        }
+    }
 
-    public sealed class BuildEvent : OrchestrationMessage()
+    public sealed class BuildEvent : OrchestrationMessage() {
+        internal companion object {
+            @Suppress("unused")
+            internal const val serialVersionUID: Long = 0L
+        }
+    }
 
-    public class BuildStarted : BuildEvent()
+    public class BuildStarted : BuildEvent() {
+        internal companion object {
+            @Suppress("unused")
+            internal const val serialVersionUID: Long = 0L
+        }
+    }
 
-    public class BuildFinished: BuildEvent()
+    public class BuildFinished : BuildEvent() {
+        internal companion object {
+            @Suppress("unused")
+            internal const val serialVersionUID: Long = 0L
+        }
+    }
 
     public data class BuildTaskResult(
         public val taskId: String,
@@ -93,10 +139,20 @@ public sealed class OrchestrationMessage : Serializable {
         public val endTime: Long?,
         public val failures: List<BuildTaskFailure>
     ) : BuildEvent() {
+        internal companion object {
+            @Suppress("unused")
+            internal const val serialVersionUID: Long = 0L
+        }
+
         public data class BuildTaskFailure(
             val message: String?,
             val description: String?,
-        ) : Serializable
+        ) : Serializable {
+            internal companion object {
+                @Suppress("unused")
+                internal const val serialVersionUID: Long = 0L
+            }
+        }
     }
 
     /**
@@ -109,8 +165,18 @@ public sealed class OrchestrationMessage : Serializable {
     public data class ReloadClassesRequest(
         val changedClassFiles: Map<File, ChangeType> = emptyMap()
     ) : OrchestrationMessage() {
+        internal companion object {
+            @Suppress("unused")
+            internal const val serialVersionUID: Long = 0L
+        }
+
         public enum class ChangeType : Serializable {
-            Modified, Added, Removed
+            Modified, Added, Removed;
+
+            internal companion object {
+                @Suppress("unused")
+                internal const val serialVersionUID: Long = 0L
+            }
         }
     }
 
@@ -119,13 +185,23 @@ public sealed class OrchestrationMessage : Serializable {
         val isSuccess: Boolean,
         val errorMessage: String? = null,
         val errorStacktrace: List<StackTraceElement>? = null,
-    ) : OrchestrationMessage()
+    ) : OrchestrationMessage() {
+        internal companion object {
+            @Suppress("unused")
+            internal const val serialVersionUID: Long = 0L
+        }
+    }
 
     /**
      * Requests the client to take (and send) a screenshot:
      * Note, only special clients (e.g. clients under test) do support this.
      */
-    public class TakeScreenshotRequest : OrchestrationMessage()
+    public class TakeScreenshotRequest : OrchestrationMessage() {
+        internal companion object {
+            @Suppress("unused")
+            internal const val serialVersionUID: Long = 0L
+        }
+    }
 
     /**
      * A screenshot was taken (as response to [TakeScreenshotRequest])
@@ -135,7 +211,12 @@ public sealed class OrchestrationMessage : Serializable {
     public class Screenshot(
         public val format: String,
         public val data: ByteArray
-    ) : OrchestrationMessage()
+    ) : OrchestrationMessage() {
+        internal companion object {
+            @Suppress("unused")
+            internal const val serialVersionUID: Long = 0L
+        }
+    }
 
     /**
      * Simple message that can be passed across the whole orchestration:
@@ -152,6 +233,9 @@ public sealed class OrchestrationMessage : Serializable {
             public const val TAG_AGENT: String = "Agent"
             public const val TAG_RUNTIME: String = "Runtime"
             public const val TAG_DEVTOOLS: String = "DevTools"
+
+            @Suppress("unused")
+            internal const val serialVersionUID: Long = 0L
         }
 
         override fun toString(): String {
@@ -162,7 +246,12 @@ public sealed class OrchestrationMessage : Serializable {
     /**
      * Noop empty message used to ping, or sync with the application.
      */
-    public class Ping() : OrchestrationMessage()
+    public class Ping() : OrchestrationMessage() {
+        internal companion object {
+            @Suppress("unused")
+            internal const val serialVersionUID: Long = 0L
+        }
+    }
 
     /**
      * Acknowledgement for a given message.
@@ -170,14 +259,24 @@ public sealed class OrchestrationMessage : Serializable {
      */
     public data class Ack(
         val acknowledgedMessageId: UUID
-    ) : OrchestrationMessage()
+    ) : OrchestrationMessage() {
+        internal companion object {
+            @Suppress("unused")
+            internal const val serialVersionUID: Long = 0L
+        }
+    }
 
     /**
      * An event sent for testing purposes:
      * For example, integration tests will send such payloads to communicate with
      * the 'application under test'
      */
-    public data class TestEvent(val payload: Any?) : OrchestrationMessage()
+    public data class TestEvent(val payload: Any?) : OrchestrationMessage() {
+        internal companion object {
+            @Suppress("unused")
+            internal const val serialVersionUID: Long = 0L
+        }
+    }
 
     public data class ApplicationWindowPositioned(
         val windowId: WindowId,
@@ -186,15 +285,30 @@ public sealed class OrchestrationMessage : Serializable {
         val width: Int,
         val height: Int,
         val isAlwaysOnTop: Boolean,
-    ) : OrchestrationMessage()
+    ) : OrchestrationMessage() {
+        internal companion object {
+            @Suppress("unused")
+            internal const val serialVersionUID: Long = 0L
+        }
+    }
 
     public data class ApplicationWindowGone(
         val windowId: WindowId
-    ) : OrchestrationMessage()
+    ) : OrchestrationMessage() {
+        internal companion object {
+            @Suppress("unused")
+            internal const val serialVersionUID: Long = 0L
+        }
+    }
 
     public data class ApplicationWindowGainedFocus(
         val windowId: WindowId
-    ) : OrchestrationMessage()
+    ) : OrchestrationMessage() {
+        internal companion object {
+            @Suppress("unused")
+            internal const val serialVersionUID: Long = 0L
+        }
+    }
 
     /**
      * Sent once the UI was rendered
@@ -207,13 +321,23 @@ public sealed class OrchestrationMessage : Serializable {
         val windowId: WindowId?,
         val reloadRequestId: UUID?,
         val iteration: Int,
-    ) : OrchestrationMessage()
+    ) : OrchestrationMessage() {
+        internal companion object {
+            @Suppress("unused")
+            internal const val serialVersionUID: Long = 0L
+        }
+    }
 
     public class UIException(
         public val windowId: WindowId?,
         public val message: String?,
         public val stacktrace: List<StackTraceElement>
-    ) : OrchestrationMessage()
+    ) : OrchestrationMessage() {
+        internal companion object {
+            @Suppress("unused")
+            internal const val serialVersionUID: Long = 0L
+        }
+    }
 
 
     /**
@@ -235,18 +359,32 @@ public sealed class OrchestrationMessage : Serializable {
             exceptionClassName = throwable.javaClass.name,
             stacktrace = throwable.withLinearClosure { it.cause }.flatMap { it.stackTrace.toList() }
         )
+        internal companion object {
+            @Suppress("unused")
+            internal const val serialVersionUID: Long = 0L
+        }
     }
 
 
     /**
      * Will try to clean the composition (all remembered values will be discarded)
      */
-    public class CleanCompositionRequest : OrchestrationMessage()
+    public class CleanCompositionRequest : OrchestrationMessage() {
+        internal companion object {
+            @Suppress("unused")
+            internal const val serialVersionUID: Long = 0L
+        }
+    }
 
     /**
      * Will try to re-run all failed compositions
      */
-    public class RetryFailedCompositionRequest() : OrchestrationMessage()
+    public class RetryFailedCompositionRequest() : OrchestrationMessage() {
+        internal companion object {
+            @Suppress("unused")
+            internal const val serialVersionUID: Long = 0L
+        }
+    }
 
 
     /* Base implementation */

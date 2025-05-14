@@ -15,4 +15,13 @@ internal class OrchestrationHandshake(
     val clientId: UUID,
     val clientRole: OrchestrationClientRole,
     val clientPid: Long? = null,
-) : Serializable
+) : Serializable {
+    override fun toString(): String {
+        return "OrchestrationHandshake($clientRole, pid=$clientPid, clientId=$clientId)"
+    }
+
+    internal companion object {
+        @Suppress("unused")
+        const val serialVersionUID: Long = 0L
+    }
+}

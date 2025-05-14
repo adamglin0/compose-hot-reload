@@ -28,6 +28,10 @@ dependencies {
     testImplementation(deps.junit.jupiter.engine)
     testImplementation(deps.coroutines.test)
     testImplementation(deps.logback)
+    testImplementation(deps.asm)
+    testImplementation(deps.asm.tree)
+    testImplementation(project(":hot-reload-analysis"))
+    testImplementation(kotlin ("reflect"))
 }
 
 tasks.withType<Test> {

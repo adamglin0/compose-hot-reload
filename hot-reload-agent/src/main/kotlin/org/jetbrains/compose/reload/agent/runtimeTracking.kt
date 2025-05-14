@@ -11,8 +11,12 @@ import org.jetbrains.compose.reload.analysis.RuntimeDirtyScopes
 import org.jetbrains.compose.reload.analysis.TrackingRuntimeInfo
 import org.jetbrains.compose.reload.analysis.isIgnoredClassId
 import org.jetbrains.compose.reload.analysis.resolveDirtyRuntimeScopes
+import org.jetbrains.compose.reload.analysis.verifyRedefinitions
+import org.jetbrains.compose.reload.core.Try
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.leftOr
 import org.jetbrains.compose.reload.core.submitSafe
+import org.jetbrains.compose.reload.core.toLeft
 import java.lang.instrument.ClassFileTransformer
 import java.lang.instrument.Instrumentation
 import java.lang.ref.WeakReference
@@ -39,7 +43,13 @@ internal fun launchRuntimeTracking(instrumentation: Instrumentation) {
     instrumentation.addTransformer(RuntimeTrackingTransformer)
 }
 
-internal fun redefineRuntimeInfo(): Future<RuntimeDirtyScopes> = runtimeAnalysisThread.submitSafe {
+internal fun redefineRuntimeInfo(): Future<Try<RuntimeDirtyScopes>> = runtimeAnalysisThread.submitSafe {
+    Try {
+        currentRuntime.verifyRedefinitions(pendingRedefinitions)
+    }.leftOr {
+        return@submitSafe it
+    }
+
     val redefinition = currentRuntime.resolveDirtyRuntimeScopes(pendingRedefinitions)
 
     /* Patch current runtime info */
@@ -53,7 +63,7 @@ internal fun redefineRuntimeInfo(): Future<RuntimeDirtyScopes> = runtimeAnalysis
 
     logger.debug("Applied redefined 'RuntimeInfo' in [$patchDuration]")
 
-    redefinition
+    redefinition.toLeft()
 }
 
 internal fun findClassLoader(classId: ClassId): Future<ClassLoader?> = runtimeAnalysisThread.submitSafe {

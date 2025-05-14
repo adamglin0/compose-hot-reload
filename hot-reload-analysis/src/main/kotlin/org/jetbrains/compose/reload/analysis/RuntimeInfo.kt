@@ -10,6 +10,7 @@ package org.jetbrains.compose.reload.analysis
 
 import org.jetbrains.compose.reload.core.withClosure
 import org.objectweb.asm.Opcodes
+import org.objectweb.asm.tree.AnnotationNode
 import org.objectweb.asm.tree.ClassNode
 import org.objectweb.asm.tree.MethodInsnNode
 import org.objectweb.asm.tree.MethodNode
@@ -118,25 +119,25 @@ internal fun ClassInfo(classNode: ClassNode): ClassInfo? {
 internal fun RuntimeScopeInfo(classNode: ClassNode, methodNode: MethodNode): RuntimeScopeInfo? {
     val methodId = MethodId(classNode, methodNode)
     val runtimeInstructionTree = parseRuntimeInstructionTreeLenient(methodId, methodNode)
-    val isComposeEntry = isComposeEntry(methodNode)
-    return createRuntimeScopeInfo(methodId, runtimeInstructionTree, isComposeEntry)
+    val methodType = detectMethodType(methodNode)
+    return createRuntimeScopeInfo(methodId, runtimeInstructionTree, methodType)
 }
 
 
 internal fun createRuntimeScopeInfo(
     methodId: MethodId,
     tree: RuntimeInstructionTree,
-    isComposeEntry: Boolean,
+    methodType: MethodType,
 ): RuntimeScopeInfo {
     return RuntimeScopeInfo(
         methodId = methodId,
-        type = tree.type,
+        methodType = methodType,
+        scopeType = tree.type,
         group = tree.group,
         methodDependencies = tree.methodDependencies(),
         fieldDependencies = tree.fieldDependencies(),
-        children = tree.children.map { child -> createRuntimeScopeInfo(methodId, child, false) },
+        children = tree.children.map { child -> createRuntimeScopeInfo(methodId, child, methodType) },
         hash = tree.codeHash(),
-        isComposeEntry = isComposeEntry
     )
 }
 
@@ -149,9 +150,15 @@ private val COMPOSE_APP_ENTRIES = setOf(
     Ids.ScreenshotTestApplicationKt.screenshotTestApplication_default,
 )
 
-private fun isComposeEntry(methodNode: MethodNode): Boolean {
-    return methodNode.instructions.any {
-        it is MethodInsnNode &&
-            MethodId(ClassId(it.owner), it.name, it.desc) in COMPOSE_APP_ENTRIES
-    }
+private fun detectMethodType(methodNode: MethodNode): MethodType = when {
+    methodNode.instructions.filterIsInstance<MethodInsnNode>()
+        .any { MethodId(it) in COMPOSE_APP_ENTRIES } -> MethodType.ComposeEntryPoint
+    methodNode.allAnnotations
+        .any { ClassId.fromDesc(it.desc) == Ids.Composable.classId } -> MethodType.Composable
+    else -> MethodType.Regular
+}
+
+private val MethodNode.allAnnotations: List<AnnotationNode> get() = buildList {
+    addAll(visibleAnnotations.orEmpty())
+    addAll(invisibleAnnotations.orEmpty())
 }

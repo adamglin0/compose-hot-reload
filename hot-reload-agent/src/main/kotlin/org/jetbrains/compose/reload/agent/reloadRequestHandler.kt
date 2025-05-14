@@ -6,7 +6,6 @@
 package org.jetbrains.compose.reload.agent
 
 
-import org.jetbrains.compose.reload.core.Try
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.exception
 import org.jetbrains.compose.reload.core.isFailure
@@ -17,7 +16,6 @@ import org.jetbrains.compose.reload.orchestration.invokeWhenReceived
 import java.io.File
 import java.lang.instrument.Instrumentation
 import javax.swing.SwingUtilities
-import kotlin.system.exitProcess
 
 private val logger = createLogger()
 
@@ -30,7 +28,7 @@ internal fun launchReloadRequestHandler(instrumentation: Instrumentation) {
             pendingChanges = pendingChanges + request.changedClassFiles
 
             executeBeforeHotReloadListeners(request.messageId)
-            val result = Try { reload(instrumentation, request.messageId, pendingChanges) }
+            val result = reload(instrumentation, request.messageId, pendingChanges)
 
             /*
             Yuhuu! We reloaded the classes; We can reset the 'pending changes'; No re-try necessary

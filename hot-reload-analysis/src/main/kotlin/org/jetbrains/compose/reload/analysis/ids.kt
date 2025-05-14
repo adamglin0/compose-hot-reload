@@ -6,6 +6,9 @@
 package org.jetbrains.compose.reload.analysis
 
 object Ids {
+    object Composable {
+        val classId = ClassId("androidx/compose/runtime/Composable")
+    }
     object Composer {
         val classId = ClassId("androidx/compose/runtime/Composer")
 

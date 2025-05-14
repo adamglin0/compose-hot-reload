@@ -150,7 +150,7 @@ class ErrorRecoveryTests {
             /*
             Legal Change: replace the code inside the composable function
             */
-            code.replaceText("""Text("Hello")""","""Text("hello")""")
+            code.replaceText("""Text("Hello")""", """Text("hello")""")
             requestReload()
             val request = skipToMessage<OrchestrationMessage.ReloadClassesRequest>()
             val result = skipToMessage<OrchestrationMessage.ReloadClassesResult>()
@@ -163,7 +163,8 @@ class ErrorRecoveryTests {
             /*
             Illegal Change: replace the code outside composable scope
             */
-            code.replaceText("""
+            code.replaceText(
+                """
                 fun main() {
                     screenshotTestApplication {
                         Text("hello")
@@ -183,11 +184,34 @@ class ErrorRecoveryTests {
             val result = skipToMessage<OrchestrationMessage.ReloadClassesResult>()
             assertEquals(request.messageId, result.reloadRequestId)
             assertFalse(result.isSuccess)
-            assertEquals(
-                """java.lang.IllegalStateException: Compose Hot Reload does not support the redefinition of compose entry method MainKt.main ()V.
-Please use 'Restart' option to load the new changes""",
-                result.errorMessage
+        }
+
+        fixture.runTransaction {
+            /*
+            Illegal Change: replace the code outside composable scope
+            */
+            code.replaceText(
+                """
+                fun main() {
+                    var myVariable = 0
+                    screenshotTestApplication {
+                        myVariable = 1
+                        Text("${d}myVariable")
+                    }
+                }""".trimIndent(),
+                """
+                fun main() {
+                    screenshotTestApplication {
+                        Text("hello")
+                    }
+                }""".trimIndent()
             )
+            requestReload()
+            val request = skipToMessage<OrchestrationMessage.ReloadClassesRequest>()
+            val result = skipToMessage<OrchestrationMessage.ReloadClassesResult>()
+            assertEquals(request.messageId, result.reloadRequestId)
+            assertTrue(result.isSuccess)
+            fixture.checkScreenshot("3-restore-after-invalid-change")
         }
     }
 }

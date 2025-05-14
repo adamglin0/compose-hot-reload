@@ -7,7 +7,9 @@ package org.jetbrains.compose.reload.agent
 
 import org.jetbrains.compose.reload.analysis.ClassId
 import org.jetbrains.compose.reload.analysis.RuntimeDirtyScopes
+import org.jetbrains.compose.reload.core.Try
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.mapLeft
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import java.io.ByteArrayOutputStream
 import java.io.DataOutputStream
@@ -28,7 +30,7 @@ internal fun reload(
     instrumentation: Instrumentation,
     reloadRequestId: UUID,
     pendingChanges: Map<File, OrchestrationMessage.ReloadClassesRequest.ChangeType>
-): Reload {
+): Try<Reload> {
     val definitions = pendingChanges.mapNotNull { (file, change) ->
         if (change == OrchestrationMessage.ReloadClassesRequest.ChangeType.Removed) {
             logger.info("Removed: $file")
@@ -109,8 +111,9 @@ internal fun reload(
     }
 
     instrumentation.redefineClasses(*definitions.toTypedArray())
-    val redefinition = redefineRuntimeInfo().get()
-    val reload = Reload(reloadRequestId, definitions, redefinition)
-    reinitializeStaticsIfNecessary(reload)
-    return reload
+    return redefineRuntimeInfo().get().mapLeft { redefinition ->
+        val reload = Reload(reloadRequestId, definitions, redefinition)
+        reinitializeStaticsIfNecessary(reload)
+        reload
+    }
 }
